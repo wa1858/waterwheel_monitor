@@ -25,7 +25,6 @@
 //MID Certified
 //Stock No: 236-9298
 //
-//
 // includes audio warning
 
 
