@@ -44,6 +44,7 @@
 #include <memory.h>
 #include <time.h>
 
+// TODO - What should this return if okay?
 int writedata(HANDLE hSerial1, char data_request1[8])
 {
     // Function to send data request to energy meter
@@ -81,6 +82,7 @@ float char_to_float(char bytes_to_read1[9])
 	byte1[3] = (int)bytes_to_read1[5];
 	byte1[4] = (int)bytes_to_read1[6];
  
+    // TODO - Find a better way to convert 32 bits to float from 4 regs
 	int intdata;   //now convert the four integers into a single integer representing the 4 x 8 = 32bit number
 	intdata = (byte1[1] * 16777216) + (byte1[2] * 65536) + (byte1[3] * 256) + byte1[4];
 
@@ -142,6 +144,7 @@ int main()
 
     delay_msecs(4000); //wait 4secs to allow header to be read
 
+    // TODO - Extract serial port initialisation
          
     // Open the highest available serial port number
     fprintf(stderr, "Opening serial port...");
