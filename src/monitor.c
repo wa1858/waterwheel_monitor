@@ -20,14 +20,12 @@
 // Program for monitoring frequency from RS PRO 1 Phase Backlit LCD Energy Meter, Type Energy Meter RS Stock No. 236-9298
 // Interface via Modbus
 //
-//Reference: Modbus Guide (aka ICD)
-//RS PRO DIN Rail Multifunction Power Meter
-//MID Certified
-//Stock No: 236-9298
+// Reference: Modbus Guide (aka ICD)
+// RS PRO DIN Rail Multifunction Power Meter
+// MID Certified
+// Stock No: 236-9298
 //
 // includes audio warning
-
-
 
 // To compile with MinGW:
 //
@@ -38,7 +36,7 @@
 //
 //      <filename>.exe  //.exe optional
 //
- 
+
 #include <windows.h>
 #include <stdio.h>
 #include <memory.h>
@@ -49,7 +47,7 @@ int writedata(HANDLE hSerial1, char data_request1[8])
 {
     // Function to send data request to energy meter
     DWORD bytes_written, total_bytes_written = 0;
-    if(!WriteFile(hSerial1, data_request1, 8, &bytes_written, NULL))
+    if (!WriteFile(hSerial1, data_request1, 8, &bytes_written, NULL))
     {
         // TODO - Make this error more descriptive
         fprintf(stderr, "Error\n");
@@ -57,109 +55,111 @@ int writedata(HANDLE hSerial1, char data_request1[8])
         return 1;
     };
     return 0;
-} 
+}
 
 // TODO - What should this return if okay?
 BOOL readdata(HANDLE hSerial1, char bytes_to_read1[9])
 {
-        DWORD bytes_read1 = 0;
-        BOOL status = FALSE;
-        status = ReadFile(hSerial1, bytes_to_read1, 9, &bytes_read1, NULL);
-        if (!status) {
-            fprintf(stderr, "Error: Could not read serial port.\n");
-            CloseHandle(hSerial1);
-            return EXIT_FAILURE;
-        };
+    DWORD bytes_read1 = 0;
+    BOOL status = FALSE;
+    status = ReadFile(hSerial1, bytes_to_read1, 9, &bytes_read1, NULL);
+    if (!status)
+    {
+        fprintf(stderr, "Error: Could not read serial port.\n");
+        CloseHandle(hSerial1);
+        return EXIT_FAILURE;
+    };
 }
 
 /**
  * Converts four char bytes to an equivalent 32-bit float
  * Implemnted as the energy meter generates data in floating
  * point format but program reads data as four distinct bytes
-*/
-float char_to_float(char bytes_to_read1[9]){
-	int byte1[4];  //start by converting the character bytes into integers
-	byte1[1] = (int)bytes_to_read1[3];
-	byte1[2] = (int)bytes_to_read1[4];
-	byte1[3] = (int)bytes_to_read1[5];
-	byte1[4] = (int)bytes_to_read1[6];
- 
-	//Convert the four integers into a single integer representing 32-bit number
-	unsigned intdata = (byte1[1] << 24) + (byte1[2] << 16) + (byte1[3] << 8) + byte1[4];
+ */
+float char_to_float(char bytes_to_read1[9])
+{
+    int byte1[4]; // start by converting the character bytes into integers
+    byte1[1] = (int)bytes_to_read1[3];
+    byte1[2] = (int)bytes_to_read1[4];
+    byte1[3] = (int)bytes_to_read1[5];
+    byte1[4] = (int)bytes_to_read1[6];
 
-    //Assign result to memory assigned for float, resulting in float cast
-	float f;
-	unsigned dw = intdata;
-	// memcpy(&f, &dw, sizeof(float));
+    // Convert the four integers into a single integer representing 32-bit number
+    unsigned intdata = (byte1[1] << 24) + (byte1[2] << 16) + (byte1[3] << 8) + byte1[4];
+
+    // Assign result to memory assigned for float, resulting in float cast
+    float f;
+    unsigned dw = intdata;
+    // memcpy(&f, &dw, sizeof(float));
     memcpy(&f, &intdata, sizeof(float));
 
-	return f;
+    return f;
 }
-
 
 /**
  * Create time delay as required
-*/
+ */
 void delay_msecs(int milli_seconds)
 {
     // Storing start time
     clock_t start_time = clock();
- 
-    // Loop for required time
-    while (clock() < start_time + milli_seconds);
-}
 
+    // Loop for required time
+    while (clock() < start_time + milli_seconds)
+        ;
+}
 
 // TODO - Retrieve user input for desired frequency limits
 int main()
 {
     // Define frequency_request command per Energy Meter Modbus ICD
     char frequency_request[8];
-    frequency_request[0] = 0x01; //address 01
-    frequency_request[1] = 0x04; //read input registers
-    frequency_request[2] = 0x00; //Hi Byte Frequency
-    frequency_request[3] = 0x46; //Lo Byte Frequency
-    frequency_request[4] = 0x00; //Number of registers high
-    frequency_request[5] = 0x02; //Number of registers low
-    frequency_request[6] = 0x90; //Error check low - determined by sending above data using RealTerm
-    frequency_request[7] = 0x1E; //Error check high - dertermined by sending above data using RealTerm
+    frequency_request[0] = 0x01; // address 01
+    frequency_request[1] = 0x04; // read input registers
+    frequency_request[2] = 0x00; // Hi Byte Frequency
+    frequency_request[3] = 0x46; // Lo Byte Frequency
+    frequency_request[4] = 0x00; // Number of registers high
+    frequency_request[5] = 0x02; // Number of registers low
+    frequency_request[6] = 0x90; // Error check low - determined by sending above data using RealTerm
+    frequency_request[7] = 0x1E; // Error check high - dertermined by sending above data using RealTerm
 
     unsigned char bytes_to_read[9];
- 
+
     // Declare variables and structures
     HANDLE hSerial;
     DCB dcbSerialParams = {0};
     COMMTIMEOUTS timeouts = {0};
-    const float maxavfreq=48.0, minavfreq=44.0;
+    const float maxavfreq = 48.0, minavfreq = 44.0;
 
     // Print program header
-    printf("Monitor program for waterwheel Rev 1_0    16/12/23");
+    printf("Monitor program for waterwheel Rev 1_0_1    23/12/23");
     printf(" \n");
     printf(" \n");
-    printf("     Minimum Frequency (Hz) %2.1f",minavfreq);
+    printf("     Minimum Frequency (Hz) %2.1f", minavfreq);
     printf(" \n");
-    printf("     Maximum Frequency (Hz) %2.1f",maxavfreq);
+    printf("     Maximum Frequency (Hz) %2.1f", maxavfreq);
     printf(" \n");
     printf(" \n");
     printf(" \n");
 
-    //Wait 4secs to allow header to be read
+    // Wait 4secs to allow header to be read
     delay_msecs(4000);
 
     // TODO - Extract serial port initialisation
-         
+
     // Open the highest available serial port number
     fprintf(stderr, "Opening serial port... ");
     hSerial = CreateFile(
-                "\\\\.\\COM4", GENERIC_READ|GENERIC_WRITE, 0, NULL,
-                OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL );
+        "\\\\.\\COM4", GENERIC_READ | GENERIC_WRITE, 0, NULL,
+        OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     if (hSerial == INVALID_HANDLE_VALUE)
     {
-            fprintf(stderr, "Error\n");
-            return 1;
+        fprintf(stderr, "Error\n");
+        return 1;
     }
-    else fprintf(stderr, "OK\n");
-     
+    else
+        fprintf(stderr, "OK\n");
+
     // Set device parameters (9600 baud, 1 start bit,
     // 1 stop bit, no parity)
     dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
@@ -169,81 +169,87 @@ int main()
         CloseHandle(hSerial);
         return 1;
     }
-     
+
     dcbSerialParams.BaudRate = CBR_9600;
     dcbSerialParams.ByteSize = 8;
     dcbSerialParams.StopBits = ONESTOPBIT;
     dcbSerialParams.Parity = NOPARITY;
-    if(SetCommState(hSerial, &dcbSerialParams) == 0)
+    if (SetCommState(hSerial, &dcbSerialParams) == 0)
     {
         fprintf(stderr, "Error setting device parameters\n");
         CloseHandle(hSerial);
         return 1;
     }
- 
+
     // Set COM port timeout settings
     timeouts.ReadIntervalTimeout = 50;
     timeouts.ReadTotalTimeoutConstant = 50;
     timeouts.ReadTotalTimeoutMultiplier = 10;
     timeouts.WriteTotalTimeoutConstant = 50;
     timeouts.WriteTotalTimeoutMultiplier = 10;
-    if(SetCommTimeouts(hSerial, &timeouts) == 0)
+    if (SetCommTimeouts(hSerial, &timeouts) == 0)
     {
         fprintf(stderr, "Error setting timeouts\n");
         CloseHandle(hSerial);
         return 1;
     }
- 
 
-int i, j, k;
-float average_frequency, temp_sum;
-float averaging_data[10];
-	averaging_data[0]=0;
-	averaging_data[1]=0;
-	averaging_data[2]=0;
-	averaging_data[3]=0;
-	averaging_data[4]=0;
-	averaging_data[5]=0;
-	averaging_data[6]=0;
-	averaging_data[7]=0;
-	averaging_data[8]=0;
-	averaging_data[9]=0;
+    int i, j, k;
+    float average_frequency, temp_sum;
+    float averaging_data[10];
+    averaging_data[0] = 0;
+    averaging_data[1] = 0;
+    averaging_data[2] = 0;
+    averaging_data[3] = 0;
+    averaging_data[4] = 0;
+    averaging_data[5] = 0;
+    averaging_data[6] = 0;
+    averaging_data[7] = 0;
+    averaging_data[8] = 0;
+    averaging_data[9] = 0;
 
-j=0;
-for(i=1; i<60000; i++)
-{
-	writedata(hSerial,frequency_request);
-	readdata(hSerial, bytes_to_read);
+    j = 0;
+    for (i = 1; i < 60000; i++)
+    {
+        writedata(hSerial, frequency_request);
+        readdata(hSerial, bytes_to_read);
 
-    //Read the frequency from the Energy Meter
-	float frequency; 
-	frequency=char_to_float(bytes_to_read);
-	printf("Frequency (Hz) %2.1f",frequency);
+        // Read the frequency from the Energy Meter
+        float frequency;
+        frequency = char_to_float(bytes_to_read);
+        printf("Frequency (Hz) %2.1f", frequency);
 
-	//Calculate the average frequency
-	averaging_data[j]=frequency;
-	if (j==9){j=0;}else{j++;} //incrementing the averaging data indice
-	temp_sum=0;
-	for(k=0; k<10; k++)
-	{
-		temp_sum=temp_sum+averaging_data[k];
-	}
+        // Calculate the average frequency
+        averaging_data[j] = frequency;
+        if (j == 9)
+        {
+            j = 0;
+        }
+        else
+        {
+            j++;
+        } // incrementing the averaging data indice
+        temp_sum = 0;
+        for (k = 0; k < 10; k++)
+        {
+            temp_sum = temp_sum + averaging_data[k];
+        }
 
-	average_frequency = temp_sum/10;
-	printf("     Average Frequency (Hz) %2.1f",average_frequency);
+        average_frequency = temp_sum / 10;
+        printf("     Average Frequency (Hz) %2.1f", average_frequency);
 
-	//now check if average frequency is out of range
-	(average_frequency>maxavfreq)? printf("     OVERSPEED ERROR"): printf(" ");
-	(average_frequency>maxavfreq)? MessageBeep(MB_OK): printf(" ");
-	(average_frequency<minavfreq)? printf("     UNDERSPEED ERROR"): printf(" ");
-	(average_frequency<minavfreq)? MessageBeep(MB_OK): printf(" ");
+        // now check if average frequency is out of range
+        (average_frequency > maxavfreq) ? printf("     OVERSPEED ERROR") : printf(" ");
+        (average_frequency > maxavfreq) ? MessageBeep(MB_OK) : printf(" ");
+        (average_frequency < minavfreq) ? printf("     UNDERSPEED ERROR") : printf(" ");
+        (average_frequency < minavfreq) ? MessageBeep(MB_OK) : printf(" ");
 
-	printf(" \n");
+        printf(" \n");
 
-    // Delay before next printout
-	delay_msecs(1200);
-}
-     
+        // Delay before next printout
+        delay_msecs(1200);
+    }
+
     // Close serial port
     fprintf(stderr, "Closing serial port... ");
     if (!CloseHandle(hSerial))
@@ -255,4 +261,3 @@ for(i=1; i<60000; i++)
 
     return 0;
 }
-
