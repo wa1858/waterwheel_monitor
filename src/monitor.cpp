@@ -22,10 +22,10 @@ int writedata(HANDLE hSerial1, char data_request1[8])
 }
 
 // TODO - What should this return if okay?
-BOOL readdata(HANDLE hSerial1, char bytes_to_read1[9])
+bool readdata(HANDLE hSerial1, char bytes_to_read1[9])
 {
     DWORD bytes_read1 = 0;
-    BOOL status = FALSE;
+    bool status = FALSE;
     status = ReadFile(hSerial1, bytes_to_read1, 9, &bytes_read1, NULL);
     if (!status)
     {
@@ -80,7 +80,6 @@ void delay_msecs(int milli_seconds)
 HANDLE setup_serial(int portNumber)
 {
     // Declare variables and structures
-    HANDLE hSerial;
     DCB dcbSerialParams = {0};
     COMMTIMEOUTS timeouts = {0};
 
@@ -89,7 +88,7 @@ HANDLE setup_serial(int portNumber)
 
     // Open the desired serial port
     fprintf(stderr, "Opening serial port COM%d... ", portNumber);
-    hSerial = CreateFile(
+    HANDLE hSerial = CreateFile(
         port, GENERIC_READ | GENERIC_WRITE, 0, NULL,
         OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     if (hSerial == INVALID_HANDLE_VALUE)
