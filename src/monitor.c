@@ -136,9 +136,8 @@ HANDLE setup_serial(int portNumber)
 
 int main()
 {
-    // Print program header
     printf("Monitor Program for Waterwheel\n");
-    printf("Revision: 1.0.2\n");
+    printf("Revision: 1.0.3\n");
     printf("Build date: 24/12/2023\n\n");
 
     // TODO - Imput validation
@@ -211,12 +210,12 @@ int main()
         if (average_frequency > average_frequency_max)
         {
             printf("     OVERSPEED ERROR\n");
-            MessageBeep(MB_OK);
+            MessageBeep(MB_ICONWARNING);
         }
         else if (average_frequency < average_frequency_min)
         {
             printf("     UNDERSPEED ERROR\n");
-            MessageBeep(MB_OK);
+            MessageBeep(MB_ICONWARNING);
         }
         else
         {
