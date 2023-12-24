@@ -33,6 +33,7 @@ BOOL readdata(HANDLE hSerial1, char bytes_to_read1[9])
         CloseHandle(hSerial1);
         return EXIT_FAILURE;
     };
+    return status;
 }
 
 /**
@@ -73,6 +74,62 @@ void delay_msecs(int milli_seconds)
         ;
 }
 
+HANDLE setup_serial()
+{
+    // Declare variables and structures
+    HANDLE hSerial;
+    DCB dcbSerialParams = {0};
+    COMMTIMEOUTS timeouts = {0};
+
+    // Open the desired serial port
+    fprintf(stderr, "Opening serial port... ");
+    hSerial = CreateFile(
+        "\\\\.\\COM4", GENERIC_READ | GENERIC_WRITE, 0, NULL,
+        OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (hSerial == INVALID_HANDLE_VALUE)
+    {
+        fprintf(stderr, "Error\n");
+        exit(EXIT_FAILURE);
+    }
+    fprintf(stderr, "OK\n");
+
+    // Set device parameters (9600 baud, 1 start bit,
+    // 1 stop bit, no parity)
+    dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
+    if (GetCommState(hSerial, &dcbSerialParams) == 0)
+    {
+        fprintf(stderr, "Error getting device state\n");
+        CloseHandle(hSerial);
+        exit(EXIT_FAILURE);
+    }
+
+    dcbSerialParams.BaudRate = CBR_9600;
+    dcbSerialParams.ByteSize = 8;
+    dcbSerialParams.StopBits = ONESTOPBIT;
+    dcbSerialParams.Parity = NOPARITY;
+    if (SetCommState(hSerial, &dcbSerialParams) == 0)
+    {
+        fprintf(stderr, "Error setting device parameters\n");
+        CloseHandle(hSerial);
+        exit(EXIT_FAILURE);
+    }
+
+    // Set COM port timeout settings
+    timeouts.ReadIntervalTimeout = 50;
+    timeouts.ReadTotalTimeoutConstant = 50;
+    timeouts.ReadTotalTimeoutMultiplier = 10;
+    timeouts.WriteTotalTimeoutConstant = 50;
+    timeouts.WriteTotalTimeoutMultiplier = 10;
+    if (SetCommTimeouts(hSerial, &timeouts) == 0)
+    {
+        fprintf(stderr, "Error setting timeouts\n");
+        CloseHandle(hSerial);
+        exit(EXIT_FAILURE);
+        // return 1;
+    }
+    return hSerial;
+}
+
 // TODO - Retrieve user input for desired frequency limits
 int main()
 {
@@ -89,10 +146,6 @@ int main()
 
     unsigned char bytes_to_read[9];
 
-    // Declare variables and structures
-    HANDLE hSerial;
-    DCB dcbSerialParams = {0};
-    COMMTIMEOUTS timeouts = {0};
     const float maxavfreq = 48.0, minavfreq = 44.0;
 
     // Print program header
@@ -109,74 +162,17 @@ int main()
     // Wait 4secs to allow header to be read
     delay_msecs(4000);
 
-    // TODO - Extract serial port initialisation
-
-    // Open the highest available serial port number
-    fprintf(stderr, "Opening serial port... ");
-    hSerial = CreateFile(
-        "\\\\.\\COM4", GENERIC_READ | GENERIC_WRITE, 0, NULL,
-        OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-    if (hSerial == INVALID_HANDLE_VALUE)
-    {
-        fprintf(stderr, "Error\n");
-        return 1;
-    }
-    else
-        fprintf(stderr, "OK\n");
-
-    // Set device parameters (9600 baud, 1 start bit,
-    // 1 stop bit, no parity)
-    dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
-    if (GetCommState(hSerial, &dcbSerialParams) == 0)
-    {
-        fprintf(stderr, "Error getting device state\n");
-        CloseHandle(hSerial);
-        return 1;
-    }
-
-    dcbSerialParams.BaudRate = CBR_9600;
-    dcbSerialParams.ByteSize = 8;
-    dcbSerialParams.StopBits = ONESTOPBIT;
-    dcbSerialParams.Parity = NOPARITY;
-    if (SetCommState(hSerial, &dcbSerialParams) == 0)
-    {
-        fprintf(stderr, "Error setting device parameters\n");
-        CloseHandle(hSerial);
-        return 1;
-    }
-
-    // Set COM port timeout settings
-    timeouts.ReadIntervalTimeout = 50;
-    timeouts.ReadTotalTimeoutConstant = 50;
-    timeouts.ReadTotalTimeoutMultiplier = 10;
-    timeouts.WriteTotalTimeoutConstant = 50;
-    timeouts.WriteTotalTimeoutMultiplier = 10;
-    if (SetCommTimeouts(hSerial, &timeouts) == 0)
-    {
-        fprintf(stderr, "Error setting timeouts\n");
-        CloseHandle(hSerial);
-        return 1;
-    }
+    HANDLE serial = setup_serial();
 
     int i, j, k;
     float average_frequency, temp_sum;
-    float averaging_data[10];
-    averaging_data[0] = 0;
-    averaging_data[1] = 0;
-    averaging_data[2] = 0;
-    averaging_data[3] = 0;
-    averaging_data[4] = 0;
-    averaging_data[5] = 0;
-    averaging_data[6] = 0;
-    averaging_data[7] = 0;
-    averaging_data[8] = 0;
-    averaging_data[9] = 0;
+    float averaging_data[10] = {0.0};
 
     j = 0;
     for (i = 1; i < 60000; i++)
     {
-        writedata(hSerial, frequency_request);
-        readdata(hSerial, bytes_to_read);
+        writedata(serial, frequency_request);
+        readdata(serial, bytes_to_read);
 
         // Read the frequency from the Energy Meter
         float frequency;
@@ -216,7 +212,7 @@ int main()
 
     // Close serial port
     fprintf(stderr, "Closing serial port... ");
-    if (!CloseHandle(hSerial))
+    if (!CloseHandle(serial))
     {
         fprintf(stderr, "Error closing serial port\n");
         return 1;
