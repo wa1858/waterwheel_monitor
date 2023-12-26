@@ -13,24 +13,12 @@
 #include <array>
 #include <sstream>
 
+const static std::string WHITESPACE = "        ";
+
 // TODO - Configure for adding version number to code
 // #include "config.h"
 
 // TODO - Confirm return result of 0 is okay
-int writedata(HANDLE hSerial1, char data_request1[8])
-{
-    // Function to send data request to energy meter
-    DWORD bytes_written, total_bytes_written = 0;
-    if (!WriteFile(hSerial1, data_request1, 8, &bytes_written, NULL))
-    {
-        // TODO - Make this error more descriptive
-        fprintf(stderr, "Error\n");
-        CloseHandle(hSerial1);
-        return 1;
-    };
-    return 0;
-}
-
 int writeData(HANDLE serial, const std::array<char, 8> &request)
 {
     DWORD written, totalWritten = 0;
@@ -42,20 +30,6 @@ int writeData(HANDLE serial, const std::array<char, 8> &request)
 }
 
 // TODO - What should this return if okay?
-bool readdata(HANDLE hSerial1, char bytes_to_read1[9])
-{
-    DWORD bytes_read1 = 0;
-    bool status = FALSE;
-    status = ReadFile(hSerial1, bytes_to_read1, 9, &bytes_read1, NULL);
-    if (!status)
-    {
-        fprintf(stderr, "Error: Could not read serial port.\n");
-        CloseHandle(hSerial1);
-        return EXIT_FAILURE;
-    };
-    return status;
-}
-
 bool readData(HANDLE hSerial, std::array<char, 9> &bytesToRead)
 {
     DWORD bytesRead = 0;
@@ -72,27 +46,6 @@ bool readData(HANDLE hSerial, std::array<char, 9> &bytesToRead)
  * Implemnted as the energy meter generates data in floating
  * point format but program reads data as four distinct bytes
  */
-float char_to_float(char bytes_to_read1[9])
-{
-    std::cout << "[" << bytes_to_read1[3] << "] [" << bytes_to_read1[4] << "] [" << bytes_to_read1[5] << "] [" << bytes_to_read1[6] << "]" << std::endl;
-    int byte1[4]; // start by converting the character bytes into integers
-    byte1[1] = (int)bytes_to_read1[3];
-    byte1[2] = (int)bytes_to_read1[4];
-    byte1[3] = (int)bytes_to_read1[5];
-    byte1[4] = (int)bytes_to_read1[6];
-
-    // Convert the four integers into a single integer representing 32-bit number
-    unsigned intdata = (byte1[1] << 24) + (byte1[2] << 16) + (byte1[3] << 8) + byte1[4];
-
-    // Assign result to memory assigned for float, resulting in float cast
-    float f;
-    unsigned dw = intdata;
-    // memcpy(&f, &dw, sizeof(float));
-    memcpy(&f, &intdata, sizeof(float));
-
-    return f;
-}
-
 float charToFloat(const std::array<char, 9> &bytesToRead)
 {
     // Convert the four char bytes into an equivalent 32-bit float
@@ -116,7 +69,7 @@ float charToFloat(const std::array<char, 9> &bytesToRead)
 /**
  * Create time delay as required
  */
-void delay_msecs(int milli_seconds)
+void delay(int milli_seconds)
 {
     // Storing start time
     clock_t start_time = clock();
@@ -129,7 +82,7 @@ void delay_msecs(int milli_seconds)
 /**
  * Create a HANDLE variable for accessing the serial port
  */
-HANDLE setup_serial(int portNumber)
+HANDLE setupSerial(int portNumber)
 {
     // Declare variables and structures
     DCB dcbSerialParams = {0};
@@ -139,11 +92,7 @@ HANDLE setup_serial(int portNumber)
     ss << "\\\\.\\COM" << portNumber;
     std::string port = ss.str();
 
-    // char port[10];
-    // sprintf(port, "\\\\.\\COM%d", portNumber);
-
     // Open the desired serial port
-    // fprintf(stderr, "Opening serial port COM%d... ", portNumber);
     std::cout << "Opening serial port COM" << portNumber << "... ";
     HANDLE hSerial = CreateFile(
         port.c_str(), GENERIC_READ | GENERIC_WRITE, 0, nullptr,
@@ -223,20 +172,18 @@ int main()
     frequency_request[7] = 0x1E; // Error check high - dertermined by sending above data using RealTerm
 
     const std::array<char, 8> req_frequency = {
-        static_cast<char>(0x01),
-        static_cast<char>(0x04),
-        static_cast<char>(0x00),
-        static_cast<char>(0x46),
-        static_cast<char>(0x00),
-        static_cast<char>(0x02),
-        static_cast<char>(0x90),
-        static_cast<char>(0x1E)};
-
-    char bytes_to_read[9];
+        static_cast<char>(0x01),  // address 01
+        static_cast<char>(0x04),  // read input registers
+        static_cast<char>(0x00),  // Hi Byte Frequency
+        static_cast<char>(0x46),  // Lo Byte Frequency
+        static_cast<char>(0x00),  // Number of registers high
+        static_cast<char>(0x02),  // Number of registers low
+        static_cast<char>(0x90),  // Error check low - computed using RealTerm
+        static_cast<char>(0x1E)}; // Error check high - computed using RealTerm
 
     std::array<char, 9> data;
 
-    HANDLE serial = setup_serial(port_number);
+    HANDLE serial = setupSerial(port_number);
 
     int i, j, k;
     float average_frequency, temp_sum;
@@ -248,15 +195,12 @@ int main()
     j = 0;
     for (i = 1; i < 60000; i++)
     {
-        // writedata(serial, frequency_request);
         writeData(serial, req_frequency);
-        // readdata(serial, bytes_to_read);
         readData(serial, data);
 
         // Read the frequency from the Energy Meter
-        // float frequency = char_to_float(bytes_to_read);
         float frequency = charToFloat(data);
-        printf("Frequency (Hz) %2.1f", frequency);
+        std::cout << "Frequency (Hz) " << frequency;
 
         averaging_data[j] = frequency;
         if (j == num_of_values - 1)
@@ -276,26 +220,23 @@ int main()
         }
 
         average_frequency = temp_sum / num_of_values;
-        printf("     Average Frequency (Hz) %2.1f", average_frequency);
+        std::cout << WHITESPACE << "Average Frequency (Hz) " << average_frequency;
 
         // Alert if average value is out of range
         if (average_frequency > average_frequency_max)
         {
-            printf("     OVERSPEED ERROR\n");
+            std::cout << WHITESPACE << "OVERSPEED ERROR";
             MessageBeep(MB_ICONWARNING);
         }
         else if (average_frequency < average_frequency_min)
         {
-            printf("     UNDERSPEED ERROR\n");
+            std::cout << WHITESPACE << "UNDERSPEED ERROR";
             MessageBeep(MB_ICONWARNING);
         }
-        else
-        {
-            printf("\n");
-        }
+        std::cout << std::endl;
 
         // Delay before next printout
-        delay_msecs(1200);
+        delay(1200);
     }
 
     // Close serial port
