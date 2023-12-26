@@ -1,5 +1,4 @@
-#ifndef MODBUS_HPP
-#define MODBUS_HPP
+#pragma once
 
 #include <array>
 #include <windows.h>
@@ -80,5 +79,3 @@ private:
     // TODO - Implement pointer to existing logger, rather than creating a new logger within Modbus
     Logger logger = Logger();
 };
-
-#endif

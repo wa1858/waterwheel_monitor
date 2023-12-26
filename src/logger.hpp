@@ -1,5 +1,4 @@
-#ifndef LOGGER_HPP
-#define LOGGER_HPP
+#pragma once
 
 #include <iostream>
 #include <sstream>
@@ -42,5 +41,3 @@ private:
     const std::string COLOUR_FATAL = "\x1b[31m";
     const std::string COLOUR_RESET = "\x1b[0m";
 };
-
-#endif

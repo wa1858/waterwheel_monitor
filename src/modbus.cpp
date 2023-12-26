@@ -124,6 +124,7 @@ float Modbus::convertDataToFloat(const std::array<char, 9> &bytes_to_read)
     return f;
 }
 
+// TODO - Find a better audio prompt than MessageBeep
 void Modbus::getFrequency()
 {
     float frequency = getData(REQUEST_FREQUENCY);
