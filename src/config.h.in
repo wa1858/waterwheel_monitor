@@ -1,3 +1,4 @@
-// the configured options and settings for Tutorial
-#define waterwheel_monitor_VERSION_MAJOR @waterwheel_monitor_VERSION_MAJOR @
-#define waterwheel_monitor_VERSION_MINOR @waterwheel_monitor_VERSION_MINOR @
+#define PROJECT_VERSION_MAJOR @PROJECT_VERSION_MAJOR@
+#define PROJECT_VERSION_MINOR @PROJECT_VERSION_MINOR@
+#define PROJECT_VERSION_PATCH @PROJECT_VERSION_PATCH@
+#define BUILD_DATE "@BUILD_DATE@"
