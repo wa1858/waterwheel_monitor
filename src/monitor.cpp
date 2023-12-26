@@ -270,7 +270,7 @@ void Modbus::getActivePower()
 void Modbus::getTotalActiveEnergy()
 {
     float total_active_energy = getData(REQUEST_TOTAL_ACTIVE_ENERGY);
-    std::cout << "Total Active Energy (kJ) " << std::fixed << std::setprecision(3) << total_active_energy << std::endl;
+    std::cout << "Total Active Energy (kWh) " << std::fixed << std::setprecision(3) << total_active_energy << std::endl;
 }
 
 /**
