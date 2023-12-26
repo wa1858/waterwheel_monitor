@@ -43,9 +43,12 @@ class Modbus
 public:
     Modbus(int port_number);
     ~Modbus();
-    void getFrequency();
-    void getActivePower();
-    void getTotalActiveEnergy();
+    float getFrequency();
+    float getAverageFrequency(float frequency);
+    void checkAverageFrequency(float average_frequency);
+    float getActivePower();
+    float getAverageActivePower(float active_power);
+    float getTotalActiveEnergy();
 
 private:
     /**
@@ -54,6 +57,8 @@ private:
      *                  data from MODBUS
      */
     float getData(const std::array<char, 8> &request);
+
+    float getAverage(float value, std::array<float, 10> &array);
 
     int writeData(const std::array<char, 8> &request);
 
@@ -69,11 +74,13 @@ private:
      */
     float convertDataToFloat(const std::array<char, 9> &bytes_to_read);
 
+private:
     constexpr static float FREQUENCY_MIN = 44.5;
     constexpr static float FREQUENCY_MAX = 48.5;
+    constexpr static int AVERAGES_ARRAY_SIZE = 10;
     HANDLE serial;
-    std::array<float, 10> averaging_frequency_data = {};
-    std::array<float, 10> averaging_power_data = {};
+    std::array<float, AVERAGES_ARRAY_SIZE> averaging_frequency_data = {};
+    std::array<float, AVERAGES_ARRAY_SIZE> averaging_power_data = {};
     int average_count = 0;
     // TODO - Implement pointer to existing logger, rather than creating a new logger within Modbus
     Logger logger = Logger();

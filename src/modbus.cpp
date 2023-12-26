@@ -20,6 +20,25 @@ float Modbus::getData(const std::array<char, 8> &request)
     return convertDataToFloat(data);
 }
 
+float Modbus::getAverage(float value, std::array<float, AVERAGES_ARRAY_SIZE> &array)
+{
+    array[average_count] = value;
+    float average = 0.0;
+    if (average_count < AVERAGES_ARRAY_SIZE)
+    {
+        average_count++;
+    }
+    else
+    {
+        average_count = 0;
+    }
+    for (int i = 0; i < AVERAGES_ARRAY_SIZE; i++)
+    {
+        average += averaging_frequency_data[i];
+    }
+    return average / AVERAGES_ARRAY_SIZE;
+}
+
 int Modbus::writeData(const std::array<char, 8> &request)
 {
     DWORD bytes_written = 0;
@@ -93,7 +112,6 @@ HANDLE Modbus::setupSerial(int port_number)
     timeouts.WriteTotalTimeoutMultiplier = 10;
     if (SetCommTimeouts(hSerial, &timeouts) == 0)
     {
-        // std::cerr << "Error setting timeouts" << std::endl;
         logger.log(LogLevel::fatal, "Error setting timeouts");
         CloseHandle(hSerial);
         exit(EXIT_FAILURE);
@@ -103,7 +121,6 @@ HANDLE Modbus::setupSerial(int port_number)
 
 float Modbus::convertDataToFloat(const std::array<char, 9> &bytes_to_read)
 {
-    // Convert the four char bytes into an equivalent 32-bit float
     // Note static_cast forces compiler to treat array members as int, not char
     int bytes[4];
     bytes[0] = static_cast<int>(bytes_to_read[3]);
@@ -121,67 +138,42 @@ float Modbus::convertDataToFloat(const std::array<char, 9> &bytes_to_read)
     return f;
 }
 
-// TODO - Find a better audio prompt than MessageBeep
-void Modbus::getFrequency()
+float Modbus::getFrequency()
 {
-    float frequency = getData(REQUEST_FREQUENCY);
+    return getData(REQUEST_FREQUENCY);
+}
 
-    // TODO - Extract average calculation into its own function
-    averaging_frequency_data[average_count] = frequency;
-    float average_frequency = 0.0;
-    if (average_count < averaging_frequency_data.size())
-    {
-        average_count++;
-    }
-    else
-    {
-        average_count = 0;
-    }
-    for (int i = 0; i < averaging_frequency_data.size(); i++)
-    {
-        average_frequency += averaging_frequency_data[i];
-    }
-    average_frequency /= averaging_frequency_data.size();
+float Modbus::getAverageFrequency(float frequency)
+{
+    return getAverage(frequency, averaging_frequency_data);
+}
 
-    logger.log(LogLevel::info, "Frequency (Hz) %2.1f%sAverage Frequency (Hz) %2.1f", frequency, WHITESPACE, average_frequency);
-
+// TODO - Find a better audio prompt than MessageBeep
+void Modbus::checkAverageFrequency(float average_frequency)
+{
     if (average_frequency > FREQUENCY_MAX)
     {
-        logger.log(LogLevel::warning, "%2.1fHz average frequency - OVERSPEED WARNING");
+        logger.log(LogLevel::warning, "%2.1fHz average frequency - OVERSPEED WARNING", average_frequency);
         MessageBeep(MB_ICONWARNING);
     }
     else if (average_frequency < FREQUENCY_MIN)
     {
-        logger.log(LogLevel::warning, "%2.1fHz average frequency - UNDERSPEED WARNING");
+        logger.log(LogLevel::warning, "%2.1fHz average frequency - UNDERSPEED WARNING", average_frequency);
         MessageBeep(MB_ICONWARNING);
     }
 }
 
-void Modbus::getActivePower()
+float Modbus::getActivePower()
 {
-    float active_power = getData(REQUEST_ACTIVE_POWER);
-    // TODO - Extract average calculation into its own function
-    averaging_power_data[average_count] = active_power;
-    float average_active_power = 0.0;
-    if (average_count < averaging_power_data.size())
-    {
-        average_count++;
-    }
-    else
-    {
-        average_count = 0;
-    }
-    for (int i = 0; i < averaging_power_data.size(); i++)
-    {
-        average_active_power += averaging_power_data[i];
-    }
-    average_active_power /= averaging_power_data.size();
-
-    logger.log(LogLevel::info, "Active Power (W) %2.3f%sAverage Active Power (W) %2.3f", active_power, WHITESPACE, average_active_power);
+    return getData(REQUEST_ACTIVE_POWER);
 }
 
-void Modbus::getTotalActiveEnergy()
+float Modbus::getAverageActivePower(float active_power)
 {
-    float total_active_energy = getData(REQUEST_TOTAL_ACTIVE_ENERGY);
-    logger.log(LogLevel::info, "Total Active Energy (kWh) %2.0f", total_active_energy);
+    return getAverage(active_power, averaging_power_data);
+}
+
+float Modbus::getTotalActiveEnergy()
+{
+    return getData(REQUEST_TOTAL_ACTIVE_ENERGY);
 }

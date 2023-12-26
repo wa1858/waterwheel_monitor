@@ -23,9 +23,18 @@ int main()
     while (true)
     {
         logger.log(LogLevel::none, "");
-        monitor.getFrequency();
-        monitor.getActivePower();
-        monitor.getTotalActiveEnergy();
+        float frequency = monitor.getFrequency();
+        float average_frequency = monitor.getAverageFrequency(frequency);
+        logger.log(LogLevel::info, "Frequency (Hz) %2.1f%sAverage Frequency (Hz) %2.1f", frequency, WHITESPACE, average_frequency);
+        monitor.checkAverageFrequency(average_frequency);
+
+        float active_power = monitor.getActivePower();
+        float average_active_power = monitor.getAverageActivePower(active_power);
+        logger.log(LogLevel::info, "Active Power (W) %2.3f%sAverage Active Power (W) %2.3f", active_power, WHITESPACE, average_active_power);
+
+        float total_active_energy = monitor.getTotalActiveEnergy();
+        logger.log(LogLevel::info, "Total Active Energy (kWh) %2.0f", total_active_energy);
+
         delay(1800);
     }
 
