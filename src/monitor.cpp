@@ -14,6 +14,7 @@
 #include <sstream>
 
 const static std::string WHITESPACE = "        ";
+const static bool NO_NEWLINE = false;
 
 // TODO - Put these arrays in a separate header file
 // Define frequency_request command per Energy Meter Modbus ICD
@@ -51,6 +52,7 @@ const static std::array<char, 8> REQUEST_TOTAL_ACTIVE_ENERGY = {
 // #include "config.h"
 
 // TODO - Move Logger definitions to Logger.cpp and Logger.hpp
+// TODO - Modify Logger to print coloured text in the middle of an output
 enum class LogLevel
 {
     none,
@@ -67,11 +69,13 @@ public:
     /**
      * Print an output string in a set colour as
      * defined by the log level
+     * @param logLevel  Logging level for message
+     * @param message   Message to be printed
+     * @param newLine   True if new line should be printed
      */
-    void log(LogLevel logLevel, std::string message);
+    void log(LogLevel logLevel, std::string message, bool newLine = true);
 
 private:
-    HANDLE console;
     /**
      * Colour scheme:
      * Info: Blue text, black background
@@ -86,33 +90,35 @@ private:
 
 Logger::Logger()
 {
-    this->console = GetStdHandle(STD_OUTPUT_HANDLE);
 }
 Logger::~Logger()
 {
-    CloseHandle(this->console);
 }
 
-void Logger::log(LogLevel logLevel, std::string message)
+void Logger::log(LogLevel logLevel, std::string message, bool newLine)
 {
     std::stringstream ss;
     switch (logLevel)
     {
     case LogLevel::info:
-        ss << COLOUR_INFO;
+        ss << COLOUR_INFO << "[INFO] " << COLOUR_RESET;
         break;
     case LogLevel::warning:
-        ss << COLOUR_WARNING;
+        ss << COLOUR_WARNING << "[WARNING] " << COLOUR_RESET;
         break;
     case LogLevel::fatal:
-        ss << COLOUR_FATAL;
+        ss << COLOUR_FATAL << "[ERROR] " << COLOUR_RESET;
         break;
     case LogLevel::none:
     default:
         break;
     }
-    ss << message << COLOUR_RESET;
+    ss << message;
     std::cout << ss.str();
+    if (newLine)
+    {
+        std::cout << std::endl;
+    }
 }
 
 // TODO - Put Modbus class into its own files
@@ -153,17 +159,21 @@ private:
     std::array<float, 10> averaging_frequency_data = {};
     std::array<float, 10> averaging_power_data = {};
     int average_count = 0;
+    // TODO - Implement pointer to existing logger, rather than creating a new logger within Modbus
+    Logger logger = Logger();
 };
 
-Modbus::Modbus(int port_number_)
+Modbus::Modbus(int port_number)
 {
-    this->serial = this->setupSerial(port_number_);
+    this->serial = this->setupSerial(port_number);
+    this->logger.log(LogLevel::info, "New Modbus created");
 }
 
 Modbus::~Modbus()
 {
     CloseHandle(this->serial);
-    std::cout << "Serial connection closed" << std::endl;
+    // std::cout << "Serial connection closed" << std::endl;
+    this->logger.log(LogLevel::info, "Serial connection closed");
 }
 
 float Modbus::getData(const std::array<char, 8> &request)
@@ -191,7 +201,7 @@ bool Modbus::readData(std::array<char, 9> &bytes_to_read)
     bool status = ReadFile(this->serial, bytes_to_read.data(), bytes_to_read.size(), &bytes_read, nullptr);
     if (!status)
     {
-        std::cerr << "Error - Could not read from serial port" << std::endl;
+        logger.log(LogLevel::warning, "Could not read from serial port");
     }
     return status;
 }
@@ -208,22 +218,23 @@ HANDLE Modbus::setupSerial(int port_number)
     std::string port = ss.str();
 
     // Open the desired serial port
-    std::cout << "Opening serial port COM" << port_number << "... ";
+    logger.log(LogLevel::info, "Opening serial port ", NO_NEWLINE);
+    logger.log(LogLevel::none, port);
     HANDLE hSerial = CreateFile(
         port.c_str(), GENERIC_READ | GENERIC_WRITE, 0, nullptr,
         OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
     if (hSerial == INVALID_HANDLE_VALUE)
     {
-        std::cerr << "Error" << std::endl;
+        // std::cerr << "Error" << std::endl;
+        logger.log(LogLevel::fatal, "Error");
         exit(EXIT_FAILURE);
     }
-    std::cout << "OK" << std::endl;
-
+    logger.log(LogLevel::info, "Port opened successfully");
     // Set device parameters (9600 baud, 1 start bit, 1 stop bit, no parity)
     dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
     if (GetCommState(hSerial, &dcbSerialParams) == 0)
     {
-        std::cerr << "Error getting device state" << std::endl;
+        logger.log(LogLevel::fatal, "Error getting device state");
         CloseHandle(hSerial);
         exit(EXIT_FAILURE);
     }
@@ -234,7 +245,7 @@ HANDLE Modbus::setupSerial(int port_number)
     dcbSerialParams.Parity = NOPARITY;
     if (SetCommState(hSerial, &dcbSerialParams) == 0)
     {
-        std::cerr << "Error setting device parameters" << std::endl;
+        logger.log(LogLevel::fatal, "Error setting device parameters");
         CloseHandle(hSerial);
         exit(EXIT_FAILURE);
     }
@@ -247,7 +258,8 @@ HANDLE Modbus::setupSerial(int port_number)
     timeouts.WriteTotalTimeoutMultiplier = 10;
     if (SetCommTimeouts(hSerial, &timeouts) == 0)
     {
-        std::cerr << "Error setting timeouts" << std::endl;
+        // std::cerr << "Error setting timeouts" << std::endl;
+        logger.log(LogLevel::fatal, "Error setting timeouts");
         CloseHandle(hSerial);
         exit(EXIT_FAILURE);
     }
@@ -277,7 +289,10 @@ float Modbus::convertDataToFloat(const std::array<char, 9> &bytes_to_read)
 void Modbus::getFrequency()
 {
     float frequency = getData(REQUEST_FREQUENCY);
-    std::cout << "Class Frequency (Hz) " << std::fixed << std::setprecision(1) << frequency;
+    std::cout << std::fixed << std::setprecision(1);
+    std::stringstream ss;
+    ss << "Frequency (Hz) " << std::fixed << std::setprecision(1) << frequency;
+    // std::cout << "Frequency (Hz) " << std::fixed << std::setprecision(1) << frequency;
     averaging_frequency_data[average_count] = frequency;
     // TODO - Extract average calculation into its own function
     float average_frequency = 0.0;
@@ -294,24 +309,34 @@ void Modbus::getFrequency()
         average_frequency += averaging_frequency_data[i];
     }
     average_frequency /= averaging_frequency_data.size();
-    std::cout << WHITESPACE << "Average Frequency (Hz) " << average_frequency;
+    ss << WHITESPACE << "Average Frequency (Hz) " << average_frequency;
+    logger.log(LogLevel::info, ss.str());
+    // std::cout << WHITESPACE << "Average Frequency (Hz) " << average_frequency;
     if (average_frequency > FREQUENCY_MAX)
     {
-        std::cerr << WHITESPACE << "OVERSPEED WARNING";
+        std::stringstream ss_;
+        ss_ << std::fixed << std::setprecision(1) << average_frequency << "Hz average frequency - OVERSPEED WARNING";
+        logger.log(LogLevel::warning, ss_.str());
+        // std::cerr << WHITESPACE << "OVERSPEED WARNING";
         MessageBeep(MB_ICONWARNING);
     }
     else if (average_frequency < FREQUENCY_MIN)
     {
-        std::cerr << WHITESPACE << "UNDERSPEED WARNING";
+        // std::cerr << WHITESPACE << "UNDERSPEED WARNING";
+        std::stringstream ss_;
+        ss_ << std::fixed << std::setprecision(1) << average_frequency << "Hz average frequency - UNDERSPEED WARNING";
+        logger.log(LogLevel::warning, ss_.str());
         MessageBeep(MB_ICONWARNING);
     }
-    std::cout << std::endl;
+    // std::cout << std::endl;
 }
 
 void Modbus::getActivePower()
 {
     float active_power = getData(REQUEST_ACTIVE_POWER);
-    std::cout << "Active Power (W) " << std::fixed << std::setprecision(3) << active_power;
+    std::stringstream ss;
+    ss << "Active Power (W) " << std::fixed << std::setprecision(3) << active_power;
+    // std::cout << "Active Power (W) " << std::fixed << std::setprecision(3) << active_power;
     averaging_power_data[average_count] = active_power;
     // TODO - Extract average calculation into its own function
     float average_active_power = 0.0;
@@ -328,13 +353,18 @@ void Modbus::getActivePower()
         average_active_power += averaging_power_data[i];
     }
     average_active_power /= averaging_power_data.size();
-    std::cout << WHITESPACE << "Average Active Power (W) " << average_active_power << std::endl;
+    ss << WHITESPACE << "Average Active Power (W) " << average_active_power;
+    logger.log(LogLevel::info, ss.str());
+    // std::cout << WHITESPACE << "Average Active Power (W) " << average_active_power << std::endl;
 }
 
 void Modbus::getTotalActiveEnergy()
 {
     float total_active_energy = getData(REQUEST_TOTAL_ACTIVE_ENERGY);
-    std::cout << "Total Active Energy (kWh) " << std::fixed << std::setprecision(0) << total_active_energy << std::endl;
+    std::stringstream ss;
+    ss << "Total Active Energy (kWh) " << std::fixed << std::setprecision(0) << total_active_energy;
+    logger.log(LogLevel::info, ss.str());
+    // std::cout << "Total Active Energy (kWh) " << std::fixed << std::setprecision(0) << total_active_energy << std::endl;
 }
 
 /**
@@ -353,23 +383,24 @@ void delay(int milli_seconds)
 int main()
 {
     Logger logger = Logger();
-    logger.log(LogLevel::fatal, "TEST\n");
-    logger.log(LogLevel::info, "TEST\n");
-    std::cout << "Monitor Program for Waterwheel" << std::endl;
-    std::cout << "Revision 1.4" << std::endl;
-    std::cout << "Build date: 26/12/2023" << std::endl;
+    logger.log(LogLevel::info, "Monitor Program for Waterwheel");
+    logger.log(LogLevel::info, "Revision 1.4");
+    logger.log(LogLevel::info, "Build date: 26/12/2023");
 
     // TODO - Imput validation
     int port_number;
-    std::cout << "Enter the desired serial port number: ";
+    logger.log(LogLevel::none, "Enter the desired serial port number: ", false);
     std::cin >> port_number;
-    std::cout << "Selected port: COM" << port_number << std::endl;
+    logger.log(LogLevel::info, "Selected port: COM", false);
+    std::stringstream ss;
+    ss << port_number;
+    logger.log(LogLevel::none, ss.str());
 
     Modbus monitor = Modbus(port_number);
 
     while (true)
     {
-        std::cout << std::endl;
+        logger.log(LogLevel::none, "");
         monitor.getFrequency();
         monitor.getActivePower();
         monitor.getTotalActiveEnergy();
