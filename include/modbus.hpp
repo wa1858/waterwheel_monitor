@@ -5,7 +5,6 @@
 #include <sstream>
 #include <iostream>
 #include <string.h>
-#include <iomanip> // For setprecision
 
 #include "logger.hpp"
 

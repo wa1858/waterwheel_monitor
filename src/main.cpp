@@ -9,22 +9,14 @@ int main()
 {
     Logger logger = Logger();
     logger.log(LogLevel::info, "Waterwheel Monitoring Program");
-    // TODO - Find a better way to form strings like this for logging (pass ints straight into logger.log)
-    std::stringstream ss_;
-    ss_ << "Revision " << PROJECT_VERSION_MAJOR << "." << PROJECT_VERSION_MINOR << "." << PROJECT_VERSION_PATCH;
-    logger.log(LogLevel::info, ss_.str());
-    std::stringstream ss__;
-    ss__ << "Build Date: " << BUILD_DATE;
-    logger.log(LogLevel::info, ss__.str());
+    logger.log(LogLevel::info, "Revision %d.%d.%d", PROJECT_VERSION_MAJOR, PROJECT_VERSION_MINOR, PROJECT_VERSION_PATCH);
+    logger.log(LogLevel::info, "Build Date: %s", BUILD_DATE);
 
     // TODO - Imput validation
     int port_number;
-    logger.log(LogLevel::none, "Enter the desired serial port number: ", false);
+    logger.log(LogLevel::none, "Enter the desired serial port number: ");
     std::cin >> port_number;
-    logger.log(LogLevel::info, "Selected port: COM", false);
-    std::stringstream ss;
-    ss << port_number;
-    logger.log(LogLevel::none, ss.str());
+    logger.log(LogLevel::info, "Selected port: COM%d", port_number);
 
     Modbus monitor = Modbus(port_number);
 

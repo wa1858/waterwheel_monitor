@@ -9,7 +9,6 @@ Modbus::Modbus(int port_number)
 Modbus::~Modbus()
 {
     CloseHandle(this->serial);
-    // std::cout << "Serial connection closed" << std::endl;
     this->logger.log(LogLevel::info, "Serial connection closed");
 }
 
@@ -55,15 +54,13 @@ HANDLE Modbus::setupSerial(int port_number)
     std::string port = ss.str();
 
     // Open the desired serial port
-    logger.log(LogLevel::info, "Opening serial port ", NO_NEWLINE);
-    logger.log(LogLevel::none, port);
+    logger.log(LogLevel::info, "Opening serial port COM%d", port_number);
 
     HANDLE hSerial = CreateFile(
         port.c_str(), GENERIC_READ | GENERIC_WRITE, 0, nullptr,
         OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
     if (hSerial == INVALID_HANDLE_VALUE)
     {
-        // std::cerr << "Error" << std::endl;
         logger.log(LogLevel::fatal, "Error");
         exit(EXIT_FAILURE);
     }
@@ -128,12 +125,9 @@ float Modbus::convertDataToFloat(const std::array<char, 9> &bytes_to_read)
 void Modbus::getFrequency()
 {
     float frequency = getData(REQUEST_FREQUENCY);
-    std::cout << std::fixed << std::setprecision(1);
-    std::stringstream ss;
-    ss << "Frequency (Hz) " << std::fixed << std::setprecision(1) << frequency;
-    // std::cout << "Frequency (Hz) " << std::fixed << std::setprecision(1) << frequency;
-    averaging_frequency_data[average_count] = frequency;
+
     // TODO - Extract average calculation into its own function
+    averaging_frequency_data[average_count] = frequency;
     float average_frequency = 0.0;
     if (average_count < averaging_frequency_data.size())
     {
@@ -148,36 +142,26 @@ void Modbus::getFrequency()
         average_frequency += averaging_frequency_data[i];
     }
     average_frequency /= averaging_frequency_data.size();
-    ss << WHITESPACE << "Average Frequency (Hz) " << average_frequency;
-    logger.log(LogLevel::info, ss.str());
-    // std::cout << WHITESPACE << "Average Frequency (Hz) " << average_frequency;
+
+    logger.log(LogLevel::info, "Frequency (Hz) %2.1f%sAverage Frequency (Hz) %2.1f", frequency, WHITESPACE, average_frequency);
+
     if (average_frequency > FREQUENCY_MAX)
     {
-        std::stringstream ss_;
-        ss_ << std::fixed << std::setprecision(1) << average_frequency << "Hz average frequency - OVERSPEED WARNING";
-        logger.log(LogLevel::warning, ss_.str());
-        // std::cerr << WHITESPACE << "OVERSPEED WARNING";
+        logger.log(LogLevel::warning, "%2.1fHz average frequency - OVERSPEED WARNING");
         MessageBeep(MB_ICONWARNING);
     }
     else if (average_frequency < FREQUENCY_MIN)
     {
-        // std::cerr << WHITESPACE << "UNDERSPEED WARNING";
-        std::stringstream ss_;
-        ss_ << std::fixed << std::setprecision(1) << average_frequency << "Hz average frequency - UNDERSPEED WARNING";
-        logger.log(LogLevel::warning, ss_.str());
+        logger.log(LogLevel::warning, "%2.1fHz average frequency - UNDERSPEED WARNING");
         MessageBeep(MB_ICONWARNING);
     }
-    // std::cout << std::endl;
 }
 
 void Modbus::getActivePower()
 {
     float active_power = getData(REQUEST_ACTIVE_POWER);
-    std::stringstream ss;
-    ss << "Active Power (W) " << std::fixed << std::setprecision(3) << active_power;
-    // std::cout << "Active Power (W) " << std::fixed << std::setprecision(3) << active_power;
-    averaging_power_data[average_count] = active_power;
     // TODO - Extract average calculation into its own function
+    averaging_power_data[average_count] = active_power;
     float average_active_power = 0.0;
     if (average_count < averaging_power_data.size())
     {
@@ -192,16 +176,12 @@ void Modbus::getActivePower()
         average_active_power += averaging_power_data[i];
     }
     average_active_power /= averaging_power_data.size();
-    ss << WHITESPACE << "Average Active Power (W) " << average_active_power;
-    logger.log(LogLevel::info, ss.str());
-    // std::cout << WHITESPACE << "Average Active Power (W) " << average_active_power << std::endl;
+
+    logger.log(LogLevel::info, "Active Power (W) %2.3f%sAverage Active Power (W) %2.3f", active_power, WHITESPACE, average_active_power);
 }
 
 void Modbus::getTotalActiveEnergy()
 {
     float total_active_energy = getData(REQUEST_TOTAL_ACTIVE_ENERGY);
-    std::stringstream ss;
-    ss << "Total Active Energy (kWh) " << std::fixed << std::setprecision(0) << total_active_energy;
-    logger.log(LogLevel::info, ss.str());
-    // std::cout << "Total Active Energy (kWh) " << std::fixed << std::setprecision(0) << total_active_energy << std::endl;
+    logger.log(LogLevel::info, "Total Active Energy (kWh) %2.0f", total_active_energy);
 }
