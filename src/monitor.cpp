@@ -82,9 +82,8 @@ private:
      */
     float convertDataToFloat(const std::array<char, 9> &bytes_to_read);
 
-    constexpr static float FREQUENCY_MIN = 44.0;
-    constexpr static float FREQUENCY_MAX = 48.0;
-
+    constexpr static float FREQUENCY_MIN = 44.5;
+    constexpr static float FREQUENCY_MAX = 48.5;
     HANDLE serial;
     std::array<float, 10> averaging_frequency_data = {};
     std::array<float, 10> averaging_power_data = {};
@@ -270,7 +269,7 @@ void Modbus::getActivePower()
 void Modbus::getTotalActiveEnergy()
 {
     float total_active_energy = getData(REQUEST_TOTAL_ACTIVE_ENERGY);
-    std::cout << "Total Active Energy (kWh) " << std::fixed << std::setprecision(3) << total_active_energy << std::endl;
+    std::cout << "Total Active Energy (kWh) " << std::fixed << std::setprecision(0) << total_active_energy << std::endl;
 }
 
 /**
@@ -300,13 +299,13 @@ int main()
 
     Modbus monitor = Modbus(port_number);
 
-    for (int i = 1; i < 60000; i++)
+    while (true)
     {
         std::cout << std::endl;
         monitor.getFrequency();
         monitor.getActivePower();
         monitor.getTotalActiveEnergy();
-        delay(1500);
+        delay(1800);
     }
 
     return 0;
