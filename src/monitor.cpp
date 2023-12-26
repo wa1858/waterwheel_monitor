@@ -61,6 +61,11 @@ public:
     void getTotalActiveEnergy();
 
 private:
+    /**
+     * Wrapper function for all MODBUS requests
+     * @param request   Array of chars required to retrieve
+     *                  data from MODBUS
+     */
     float getData(const std::array<char, 8> &request);
 
     int writeData(const std::array<char, 8> &request);
@@ -81,7 +86,6 @@ private:
     constexpr static float FREQUENCY_MAX = 48.0;
 
     HANDLE serial;
-    // TODO - Implement rolling average of frequencies
     std::array<float, 10> averaging_frequency_data = {};
     std::array<float, 10> averaging_power_data = {};
     int average_count = 0;
@@ -282,11 +286,10 @@ void delay(int milli_seconds)
         ;
 }
 
-// TODO - Extract data retrieval from main()
 int main()
 {
     std::cout << "Monitor Program for Waterwheel" << std::endl;
-    std::cout << "Revision 1.3" << std::endl;
+    std::cout << "Revision 1.4" << std::endl;
     std::cout << "Build date: 26/12/2023" << std::endl;
 
     // TODO - Imput validation
@@ -303,7 +306,7 @@ int main()
         monitor.getFrequency();
         monitor.getActivePower();
         monitor.getTotalActiveEnergy();
-        delay(1000);
+        delay(1500);
     }
 
     return 0;
