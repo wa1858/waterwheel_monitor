@@ -80,9 +80,13 @@ private:
      */
     void delay(int milli_seconds);
 
+    constexpr static float FREQUENCY_MIN = 44.0;
+    constexpr static float FREQUENCY_MAX = 48.0;
+
     HANDLE serial;
     // TODO - Implement rolling average of frequencies
     std::array<float, 10> averaging_frequency_data = {};
+    int average_count = 0;
 };
 
 Modbus::Modbus(int port_number_)
@@ -215,7 +219,34 @@ void Modbus::delay(int milli_seconds)
 void Modbus::getFrequency()
 {
     float frequency = getData(REQUEST_FREQUENCY);
-    std::cout << "Class Frequency (Hz) " << frequency << std::endl;
+    std::cout << "Class Frequency (Hz) " << std::fixed << std::setprecision(1) << frequency;
+    averaging_frequency_data[average_count] = frequency;
+    // TODO - Extract average calculation into its own function
+    float average_frequency = 0.0;
+    if (average_count < averaging_frequency_data.size())
+    {
+        average_count++;
+    }
+    else
+    {
+        average_count = 0;
+    }
+    for (int i = 0; i < averaging_frequency_data.size(); i++)
+    {
+        average_frequency += averaging_frequency_data[i];
+    }
+    average_frequency /= averaging_frequency_data.size();
+    std::cout << WHITESPACE << "Average Frequency (Hz) " << average_frequency;
+    if (average_frequency > FREQUENCY_MAX)
+    {
+        std::cerr << WHITESPACE << "OVERSPEED WARNING";
+    }
+    else if (average_frequency < FREQUENCY_MIN)
+    {
+        std::cerr << WHITESPACE << "UNDERSPEED WARNING";
+    }
+    std::cout << std::endl;
+
     delay(1000);
 }
 
@@ -354,14 +385,14 @@ int main()
     std::cin >> port_number;
     std::cout << "Selected port: COM" << port_number << std::endl;
 
-    // TODO - Input validation
-    float average_frequency_max, average_frequency_min;
-    std::cout << "Enter the MIN frequency limit: ";
-    std::cin >> average_frequency_min;
-    std::cout << "Enter the MAX frequency limit: ";
-    std::cin >> average_frequency_max;
-    std::cout << "Limits set from " << std::fixed << std::setprecision(1)
-              << average_frequency_min << "Hz to " << average_frequency_max << "Hz" << std::endl;
+    // // TODO - Input validation
+    // float average_frequency_max, average_frequency_min;
+    // std::cout << "Enter the MIN frequency limit: ";
+    // std::cin >> average_frequency_min;
+    // std::cout << "Enter the MAX frequency limit: ";
+    // std::cin >> average_frequency_max;
+    // std::cout << "Limits set from " << std::fixed << std::setprecision(1)
+    //           << average_frequency_min << "Hz to " << average_frequency_max << "Hz" << std::endl;
 
     std::array<char, 9> data;
 
