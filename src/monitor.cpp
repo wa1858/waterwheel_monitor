@@ -6,6 +6,9 @@
 #include <string.h>
 #include <windows.h>
 
+// TODO - Configure for adding version number to code
+// #include "config.h"
+
 // TODO - Confirm return result of 0 is okay
 int writedata(HANDLE hSerial1, char data_request1[8])
 {
