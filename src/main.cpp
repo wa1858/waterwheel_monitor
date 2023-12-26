@@ -18,7 +18,7 @@ int main()
     std::cin >> port_number;
     logger.log(LogLevel::info, "Selected port: COM%d", port_number);
 
-    Modbus monitor = Modbus(port_number);
+    Modbus monitor = Modbus(port_number, logger);
 
     while (true)
     {

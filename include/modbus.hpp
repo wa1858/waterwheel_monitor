@@ -41,7 +41,7 @@ const static std::array<char, 8> REQUEST_TOTAL_ACTIVE_ENERGY = {
 class Modbus
 {
 public:
-    Modbus(int port_number);
+    Modbus(int port_number, Logger &logger);
     ~Modbus();
     float getFrequency();
     float getAverageFrequency(float frequency);
@@ -55,6 +55,7 @@ private:
      * Wrapper function for all MODBUS requests
      * @param request   Array of chars required to retrieve
      *                  data from MODBUS
+     * @returns Float value read from meter
      */
     float getData(const std::array<char, 8> &request);
 
@@ -82,6 +83,5 @@ private:
     std::array<float, AVERAGES_ARRAY_SIZE> averaging_frequency_data = {};
     std::array<float, AVERAGES_ARRAY_SIZE> averaging_power_data = {};
     int average_count = 0;
-    // TODO - Implement pointer to existing logger, rather than creating a new logger within Modbus
-    Logger logger = Logger();
+    Logger &logger;
 };

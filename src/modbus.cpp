@@ -1,8 +1,9 @@
 #include "modbus.hpp"
 
-Modbus::Modbus(int port_number)
+Modbus::Modbus(int port_number, Logger &logger_) : logger(logger_)
 {
     this->serial = this->setupSerial(port_number);
+    // this->logger = logger_;
     this->logger.log(LogLevel::info, "New Modbus created");
 }
 
