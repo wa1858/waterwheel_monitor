@@ -29,7 +29,7 @@ Hardcoded to use COM4
 
 To compile with MinGW:
 
-    $ gcc -o <filename>.exe <filename>.c
+    $ g++ -o <filename>.exe <filename>.c
 
 
 To run:
