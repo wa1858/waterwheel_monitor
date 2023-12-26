@@ -9,6 +9,9 @@
 #include <windows.h>
 
 #include <iostream>
+#include <iomanip> // For setprecision
+#include <array>
+#include <sstream>
 
 // TODO - Configure for adding version number to code
 // #include "config.h"
@@ -28,6 +31,16 @@ int writedata(HANDLE hSerial1, char data_request1[8])
     return 0;
 }
 
+int writeData(HANDLE serial, const std::array<char, 8> &request)
+{
+    DWORD written, totalWritten = 0;
+    if (!WriteFile(serial, request.data(), request.size(), &written, nullptr))
+    {
+        return 1;
+    }
+    return 0;
+}
+
 // TODO - What should this return if okay?
 bool readdata(HANDLE hSerial1, char bytes_to_read1[9])
 {
@@ -43,6 +56,17 @@ bool readdata(HANDLE hSerial1, char bytes_to_read1[9])
     return status;
 }
 
+bool readData(HANDLE hSerial, std::array<char, 9> &bytesToRead)
+{
+    DWORD bytesRead = 0;
+    bool status = ReadFile(hSerial, bytesToRead.data(), bytesToRead.size(), &bytesRead, nullptr);
+    if (!status)
+    {
+        std::cerr << "Error - Could not read from serial port" << std::endl;
+    }
+    return status;
+}
+
 /**
  * Converts four char bytes to an equivalent 32-bit float
  * Implemnted as the energy meter generates data in floating
@@ -50,6 +74,7 @@ bool readdata(HANDLE hSerial1, char bytes_to_read1[9])
  */
 float char_to_float(char bytes_to_read1[9])
 {
+    std::cout << "[" << bytes_to_read1[3] << "] [" << bytes_to_read1[4] << "] [" << bytes_to_read1[5] << "] [" << bytes_to_read1[6] << "]" << std::endl;
     int byte1[4]; // start by converting the character bytes into integers
     byte1[1] = (int)bytes_to_read1[3];
     byte1[2] = (int)bytes_to_read1[4];
@@ -64,6 +89,26 @@ float char_to_float(char bytes_to_read1[9])
     unsigned dw = intdata;
     // memcpy(&f, &dw, sizeof(float));
     memcpy(&f, &intdata, sizeof(float));
+
+    return f;
+}
+
+float charToFloat(const std::array<char, 9> &bytesToRead)
+{
+    // Convert the four char bytes into an equivalent 32-bit float
+    int byte1[4];
+    byte1[0] = static_cast<int>(bytesToRead[3]);
+    byte1[1] = static_cast<int>(bytesToRead[4]);
+    byte1[2] = static_cast<int>(bytesToRead[5]);
+    byte1[3] = static_cast<int>(bytesToRead[6]);
+
+    // Convert the four integers into a single integer representing a 32-bit number
+    unsigned intData = (byte1[0] << 24) + (byte1[1] << 16) + (byte1[2] << 8) + byte1[3];
+
+    // Assign result to memory assigned for float, resulting in float cast
+    float f;
+    unsigned dw = intData;
+    memcpy(&f, &dw, sizeof(float));
 
     return f;
 }
@@ -90,26 +135,31 @@ HANDLE setup_serial(int portNumber)
     DCB dcbSerialParams = {0};
     COMMTIMEOUTS timeouts = {0};
 
-    char port[10];
-    sprintf(port, "\\\\.\\COM%d", portNumber);
+    std::stringstream ss;
+    ss << "\\\\.\\COM" << portNumber;
+    std::string port = ss.str();
+
+    // char port[10];
+    // sprintf(port, "\\\\.\\COM%d", portNumber);
 
     // Open the desired serial port
-    fprintf(stderr, "Opening serial port COM%d... ", portNumber);
+    // fprintf(stderr, "Opening serial port COM%d... ", portNumber);
+    std::cout << "Opening serial port COM" << portNumber << "... ";
     HANDLE hSerial = CreateFile(
-        port, GENERIC_READ | GENERIC_WRITE, 0, NULL,
-        OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+        port.c_str(), GENERIC_READ | GENERIC_WRITE, 0, nullptr,
+        OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
     if (hSerial == INVALID_HANDLE_VALUE)
     {
-        fprintf(stderr, "Error\n");
+        std::cerr << "Error" << std::endl;
         exit(EXIT_FAILURE);
     }
-    fprintf(stderr, "OK\n");
+    std::cout << "OK" << std::endl;
 
     // Set device parameters (9600 baud, 1 start bit, 1 stop bit, no parity)
     dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
     if (GetCommState(hSerial, &dcbSerialParams) == 0)
     {
-        fprintf(stderr, "Error getting device state\n");
+        std::cerr << "Error getting device state" << std::endl;
         CloseHandle(hSerial);
         exit(EXIT_FAILURE);
     }
@@ -120,7 +170,7 @@ HANDLE setup_serial(int portNumber)
     dcbSerialParams.Parity = NOPARITY;
     if (SetCommState(hSerial, &dcbSerialParams) == 0)
     {
-        fprintf(stderr, "Error setting device parameters\n");
+        std::cerr << "Error setting device parameters" << std::endl;
         CloseHandle(hSerial);
         exit(EXIT_FAILURE);
     }
@@ -154,11 +204,12 @@ int main()
 
     // TODO - Input validation
     float average_frequency_max, average_frequency_min;
-    printf("Enter the MAX frequency limit: ");
-    scanf("%f", &average_frequency_max);
-    printf("Enter the MIN frequency limit: ");
-    scanf("%f", &average_frequency_min);
-    printf("Limits set from %2.1fHz to %2.1fHz\n\n", average_frequency_min, average_frequency_max);
+    std::cout << "Enter the MIN frequency limit: ";
+    std::cin >> average_frequency_min;
+    std::cout << "Enter the MAX frequency limit: ";
+    std::cin >> average_frequency_max;
+    std::cout << "Limits set from " << std::fixed << std::setprecision(1)
+              << average_frequency_min << "Hz to " << average_frequency_max << "Hz" << std::endl;
 
     // Define frequency_request command per Energy Meter Modbus ICD
     char frequency_request[8];
@@ -171,7 +222,19 @@ int main()
     frequency_request[6] = 0x90; // Error check low - determined by sending above data using RealTerm
     frequency_request[7] = 0x1E; // Error check high - dertermined by sending above data using RealTerm
 
+    const std::array<char, 8> req_frequency = {
+        static_cast<char>(0x01),
+        static_cast<char>(0x04),
+        static_cast<char>(0x00),
+        static_cast<char>(0x46),
+        static_cast<char>(0x00),
+        static_cast<char>(0x02),
+        static_cast<char>(0x90),
+        static_cast<char>(0x1E)};
+
     char bytes_to_read[9];
+
+    std::array<char, 9> data;
 
     HANDLE serial = setup_serial(port_number);
 
@@ -185,11 +248,14 @@ int main()
     j = 0;
     for (i = 1; i < 60000; i++)
     {
-        writedata(serial, frequency_request);
-        readdata(serial, bytes_to_read);
+        // writedata(serial, frequency_request);
+        writeData(serial, req_frequency);
+        // readdata(serial, bytes_to_read);
+        readData(serial, data);
 
         // Read the frequency from the Energy Meter
-        float frequency = char_to_float(bytes_to_read);
+        // float frequency = char_to_float(bytes_to_read);
+        float frequency = charToFloat(data);
         printf("Frequency (Hz) %2.1f", frequency);
 
         averaging_data[j] = frequency;
