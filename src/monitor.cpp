@@ -50,6 +50,57 @@ const static std::array<char, 8> REQUEST_TOTAL_ACTIVE_ENERGY = {
 // TODO - Configure for adding version number to code
 // #include "config.h"
 
+// TODO - Move Logger definitions to Logger.cpp and Logger.hpp
+enum class LogLevel
+{
+    none,
+    info,
+    warning,
+    fatal
+};
+
+class Logger
+{
+public:
+    Logger();
+    ~Logger();
+    void log(LogLevel logLevel, std::string message);
+
+private:
+    const std::string COLOUR_NONE = "07";
+    const std::string COLOUR_INFO = "01";
+    const std::string COLOUR_WARNING = "06";
+    const std::string COLOUR_FATAL = "70";
+};
+
+Logger::Logger()
+{
+}
+Logger::~Logger()
+{
+}
+
+void Logger::log(LogLevel logLevel, std::string message)
+{
+    std::stringstream colour;
+    colour << "Colour ";
+    switch (logLevel)
+    {
+    case LogLevel::info:
+        colour << COLOUR_INFO;
+    case LogLevel::warning:
+        colour << COLOUR_WARNING;
+    case LogLevel::fatal:
+        colour << COLOUR_FATAL;
+    case LogLevel::none:
+    default:
+        colour << COLOUR_NONE;
+    }
+    std::string log_colour = colour.str();
+    system(log_colour.c_str());
+    std::cout << message;
+}
+
 // TODO - Put Modbus class into its own files
 class Modbus
 {
