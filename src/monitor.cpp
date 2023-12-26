@@ -64,41 +64,55 @@ class Logger
 public:
     Logger();
     ~Logger();
+    /**
+     * Print an output string in a set colour as
+     * defined by the log level
+     */
     void log(LogLevel logLevel, std::string message);
 
 private:
-    const std::string COLOUR_NONE = "07";
-    const std::string COLOUR_INFO = "01";
-    const std::string COLOUR_WARNING = "06";
-    const std::string COLOUR_FATAL = "70";
+    HANDLE console;
+    /**
+     * Colour scheme:
+     * Info: Blue text, black background
+     * Warning: Yellow text, black background
+     * Fatal: Red text, black background
+     */
+    const std::string COLOUR_INFO = "\x1b[34m";
+    const std::string COLOUR_WARNING = "\x1b[33m";
+    const std::string COLOUR_FATAL = "\x1b[31m";
+    const std::string COLOUR_RESET = "\x1b[0m";
 };
 
 Logger::Logger()
 {
+    this->console = GetStdHandle(STD_OUTPUT_HANDLE);
 }
 Logger::~Logger()
 {
+    CloseHandle(this->console);
 }
 
 void Logger::log(LogLevel logLevel, std::string message)
 {
-    std::stringstream colour;
-    colour << "Colour ";
+    std::stringstream ss;
     switch (logLevel)
     {
     case LogLevel::info:
-        colour << COLOUR_INFO;
+        ss << COLOUR_INFO;
+        break;
     case LogLevel::warning:
-        colour << COLOUR_WARNING;
+        ss << COLOUR_WARNING;
+        break;
     case LogLevel::fatal:
-        colour << COLOUR_FATAL;
+        ss << COLOUR_FATAL;
+        break;
     case LogLevel::none:
     default:
-        colour << COLOUR_NONE;
+        break;
     }
-    std::string log_colour = colour.str();
-    system(log_colour.c_str());
-    std::cout << message;
+    ss << message << COLOUR_RESET;
+    std::cout << ss.str();
 }
 
 // TODO - Put Modbus class into its own files
@@ -338,6 +352,9 @@ void delay(int milli_seconds)
 
 int main()
 {
+    Logger logger = Logger();
+    logger.log(LogLevel::fatal, "TEST\n");
+    logger.log(LogLevel::info, "TEST\n");
     std::cout << "Monitor Program for Waterwheel" << std::endl;
     std::cout << "Revision 1.4" << std::endl;
     std::cout << "Build date: 26/12/2023" << std::endl;
