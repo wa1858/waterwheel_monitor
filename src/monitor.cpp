@@ -15,6 +15,38 @@
 
 const static std::string WHITESPACE = "        ";
 
+// TODO - Put these arrays in a separate header file
+// Define frequency_request command per Energy Meter Modbus ICD
+const static std::array<char, 8> REQUEST_FREQUENCY = {
+    static_cast<char>(0x01),  // address 01
+    static_cast<char>(0x04),  // read input registers
+    static_cast<char>(0x00),  // Hi Byte Frequency
+    static_cast<char>(0x46),  // Lo Byte Frequency
+    static_cast<char>(0x00),  // Number of registers high
+    static_cast<char>(0x02),  // Number of registers low
+    static_cast<char>(0x90),  // Error check low - computed using online calculator
+    static_cast<char>(0x1E)}; // Error check high - computed using online calculator
+
+const static std::array<char, 8> REQUEST_ACTIVE_POWER = {
+    static_cast<char>(0x01),  // address 01
+    static_cast<char>(0x04),  // read input registers
+    static_cast<char>(0x00),  // Hi Byte Frequency
+    static_cast<char>(0x0C),  // Lo Byte Frequency
+    static_cast<char>(0x00),  // Number of registers high
+    static_cast<char>(0x02),  // Number of registers low
+    static_cast<char>(0xB1),  // Error check low - computed using online calculator
+    static_cast<char>(0xC8)}; // Error check high - computed using online calculator
+
+const static std::array<char, 8> REQUEST_TOTAL_ACTIVE_ENERGY = {
+    static_cast<char>(0x01),  // address 01
+    static_cast<char>(0x04),  // read input registers
+    static_cast<char>(0x01),  // Hi Byte Frequency
+    static_cast<char>(0x56),  // Lo Byte Frequency
+    static_cast<char>(0x00),  // Number of registers high
+    static_cast<char>(0x02),  // Number of registers low
+    static_cast<char>(0x90),  // Error check low - computed using online calculator
+    static_cast<char>(0x27)}; // Error check high - computed using online calculator
+
 // TODO - Configure for adding version number to code
 // #include "config.h"
 
@@ -161,17 +193,6 @@ int main()
     std::cout << "Limits set from " << std::fixed << std::setprecision(1)
               << average_frequency_min << "Hz to " << average_frequency_max << "Hz" << std::endl;
 
-    // Define frequency_request command per Energy Meter Modbus ICD
-    const std::array<char, 8> req_frequency = {
-        static_cast<char>(0x01),  // address 01
-        static_cast<char>(0x04),  // read input registers
-        static_cast<char>(0x00),  // Hi Byte Frequency
-        static_cast<char>(0x46),  // Lo Byte Frequency
-        static_cast<char>(0x00),  // Number of registers high
-        static_cast<char>(0x02),  // Number of registers low
-        static_cast<char>(0x90),  // Error check low - computed using RealTerm
-        static_cast<char>(0x1E)}; // Error check high - computed using RealTerm
-
     std::array<char, 9> data;
 
     HANDLE serial = setupSerial(port_number);
@@ -184,7 +205,7 @@ int main()
     int j = 0;
     for (int i = 1; i < 60000; i++)
     {
-        writeData(serial, req_frequency);
+        writeData(serial, REQUEST_FREQUENCY);
         readData(serial, data);
 
         // Read the frequency from the Energy Meter
