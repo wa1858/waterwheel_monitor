@@ -1,6 +1,6 @@
 // Program to monitor performance of the waterwheel
 
-// TODO - Convert C functions to C++
+// TODO - Find a better audio prompt than MessageBeep
 
 #include <stdio.h>
 #include <memory.h>
@@ -50,15 +50,16 @@ const static std::array<char, 8> REQUEST_TOTAL_ACTIVE_ENERGY = {
 // TODO - Configure for adding version number to code
 // #include "config.h"
 
-// TODO - Put Modbus into its own files
+// TODO - Put Modbus class into its own files
 class Modbus
 {
 public:
     Modbus(int port_number);
     ~Modbus();
     void getFrequency();
+    void getActivePower();
+    void getTotalActiveEnergy();
 
-protected:
 private:
     float getData(const std::array<char, 8> &request);
 
@@ -75,10 +76,6 @@ private:
      * point format but program reads data as four distinct bytes
      */
     float convertDataToFloat(const std::array<char, 9> &bytes_to_read);
-    /**
-     * Create time delay as required
-     */
-    void delay(int milli_seconds);
 
     constexpr static float FREQUENCY_MIN = 44.0;
     constexpr static float FREQUENCY_MAX = 48.0;
@@ -86,6 +83,7 @@ private:
     HANDLE serial;
     // TODO - Implement rolling average of frequencies
     std::array<float, 10> averaging_frequency_data = {};
+    std::array<float, 10> averaging_power_data = {};
     int average_count = 0;
 };
 
@@ -96,6 +94,8 @@ Modbus::Modbus(int port_number_)
 
 Modbus::~Modbus()
 {
+    CloseHandle(this->serial);
+    std::cout << "Serial connection closed" << std::endl;
 }
 
 float Modbus::getData(const std::array<char, 8> &request)
@@ -206,16 +206,6 @@ float Modbus::convertDataToFloat(const std::array<char, 9> &bytes_to_read)
     return f;
 }
 
-void Modbus::delay(int milli_seconds)
-{
-    // Storing start time
-    clock_t start_time = clock();
-
-    // Loop for required time
-    while (clock() < start_time + milli_seconds)
-        ;
-}
-
 void Modbus::getFrequency()
 {
     float frequency = getData(REQUEST_FREQUENCY);
@@ -240,14 +230,56 @@ void Modbus::getFrequency()
     if (average_frequency > FREQUENCY_MAX)
     {
         std::cerr << WHITESPACE << "OVERSPEED WARNING";
+        MessageBeep(MB_ICONWARNING);
     }
     else if (average_frequency < FREQUENCY_MIN)
     {
         std::cerr << WHITESPACE << "UNDERSPEED WARNING";
+        MessageBeep(MB_ICONWARNING);
     }
     std::cout << std::endl;
+}
 
-    delay(1000);
+void Modbus::getActivePower()
+{
+    float active_power = getData(REQUEST_ACTIVE_POWER);
+    std::cout << "Active Power (W) " << std::fixed << std::setprecision(3) << active_power;
+    averaging_power_data[average_count] = active_power;
+    // TODO - Extract average calculation into its own function
+    float average_active_power = 0.0;
+    if (average_count < averaging_power_data.size())
+    {
+        average_count++;
+    }
+    else
+    {
+        average_count = 0;
+    }
+    for (int i = 0; i < averaging_power_data.size(); i++)
+    {
+        average_active_power += averaging_power_data[i];
+    }
+    average_active_power /= averaging_power_data.size();
+    std::cout << WHITESPACE << "Average Active Power (W) " << average_active_power << std::endl;
+}
+
+void Modbus::getTotalActiveEnergy()
+{
+    float total_active_energy = getData(REQUEST_TOTAL_ACTIVE_ENERGY);
+    std::cout << "Total Active Energy (kJ) " << std::fixed << std::setprecision(3) << total_active_energy << std::endl;
+}
+
+/**
+ * Create time delay as required
+ */
+void delay(int milli_seconds)
+{
+    // Storing start time
+    clock_t start_time = clock();
+
+    // Loop for required time
+    while (clock() < start_time + milli_seconds)
+        ;
 }
 
 // TODO - Extract data retrieval from main()
@@ -267,7 +299,11 @@ int main()
 
     for (int i = 1; i < 60000; i++)
     {
+        std::cout << std::endl;
         monitor.getFrequency();
+        monitor.getActivePower();
+        monitor.getTotalActiveEnergy();
+        delay(1000);
     }
 
     return 0;
