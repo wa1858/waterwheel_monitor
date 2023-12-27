@@ -178,3 +178,8 @@ float Modbus::getTotalActiveEnergy()
 {
     return getData(REQUEST_TOTAL_ACTIVE_ENERGY);
 }
+
+float Modbus::getVoltage()
+{
+    return getData(REQUEST_VOLTAGE);
+}

@@ -35,6 +35,9 @@ int main()
         float total_active_energy = monitor.getTotalActiveEnergy();
         logger.log(LogLevel::info, "Total Active Energy (kWh) %2.0f", total_active_energy);
 
+        float voltage = monitor.getVoltage();
+        logger.log(LogLevel::info, "Voltage (V) %2.1f", voltage);
+
         monitor.incrementAverage();
 
         delay(1800);
