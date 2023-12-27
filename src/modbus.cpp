@@ -183,3 +183,8 @@ float Modbus::getVoltage()
 {
     return getData(REQUEST_VOLTAGE);
 }
+
+float Modbus::getCurrent()
+{
+    return getData(REQUEST_CURRENT);
+}

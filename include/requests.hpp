@@ -38,8 +38,8 @@ const static std::array<char, 8> REQUEST_ACTIVE_POWER = {
 const static std::array<char, 8> REQUEST_TOTAL_ACTIVE_ENERGY = {
     static_cast<char>(0x01),
     static_cast<char>(0x04),
-    static_cast<char>(0x01), // Hi Byte total active energy
-    static_cast<char>(0x56), // Lo Byte total active energy
+    static_cast<char>(0x01), // Hi byte total active energy
+    static_cast<char>(0x56), // Lo byte total active energy
     static_cast<char>(0x00),
     static_cast<char>(0x02),
     static_cast<char>(0x90),
@@ -48,9 +48,19 @@ const static std::array<char, 8> REQUEST_TOTAL_ACTIVE_ENERGY = {
 const static std::array<char, 8> REQUEST_VOLTAGE = {
     static_cast<char>(0x01),
     static_cast<char>(0x04),
-    static_cast<char>(0x00), // Hi Byte voltage
-    static_cast<char>(0x00), // Lo Byte voltage
+    static_cast<char>(0x00), // Hi byte voltage
+    static_cast<char>(0x00), // Lo byte voltage
     static_cast<char>(0x00),
     static_cast<char>(0x02),
     static_cast<char>(0x71),
     static_cast<char>(0xCB)};
+
+const static std::array<char, 8> REQUEST_CURRENT = {
+    static_cast<char>(0x01),
+    static_cast<char>(0x04),
+    static_cast<char>(0x00), // Hi byte current
+    static_cast<char>(0x06), // Lo byte current
+    static_cast<char>(0x00),
+    static_cast<char>(0x02),
+    static_cast<char>(0x91),
+    static_cast<char>(0xCA)};

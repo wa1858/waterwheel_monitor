@@ -22,6 +22,7 @@ public:
     float getAverageActivePower(float active_power);
     float getTotalActiveEnergy();
     float getVoltage();
+    float getCurrent();
     void incrementAverage();
 
 private:
