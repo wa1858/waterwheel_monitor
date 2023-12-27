@@ -3,13 +3,13 @@
 Modbus::Modbus(int port_number, Logger &logger_) : logger(logger_)
 {
     this->serial = this->setupSerial(port_number);
-    this->logger.log(LogLevel::info, "New Modbus created");
+    this->logger.log(LogLevel::debug, "New Modbus created");
 }
 
 Modbus::~Modbus()
 {
     CloseHandle(this->serial);
-    this->logger.log(LogLevel::info, "Serial connection closed");
+    this->logger.log(LogLevel::debug, "Serial connection closed");
 }
 
 float Modbus::getData(const std::array<char, 8> &request)

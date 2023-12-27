@@ -7,14 +7,14 @@
 
 int main()
 {
-    Logger logger = Logger();
+    Logger logger = Logger(LogLevel::debug);
     logger.log(LogLevel::info, "Waterwheel Monitoring Program");
-    logger.log(LogLevel::info, "Revision %d.%d.%d", PROJECT_VERSION_MAJOR, PROJECT_VERSION_MINOR, PROJECT_VERSION_PATCH);
-    logger.log(LogLevel::info, "Build Date: %s", BUILD_DATE);
+    logger.log(LogLevel::debug, "Revision %d.%d.%d", PROJECT_VERSION_MAJOR, PROJECT_VERSION_MINOR, PROJECT_VERSION_PATCH);
+    logger.log(LogLevel::debug, "Build Date: %s", BUILD_DATE);
 
     // TODO - Imput validation
     int port_number;
-    logger.log(LogLevel::none, "Enter the desired serial port number: ");
+    logger.log(LogLevel::info, "Enter the desired serial port number: ");
     std::cin >> port_number;
     logger.log(LogLevel::info, "Selected port: COM%d", port_number);
 
@@ -22,7 +22,7 @@ int main()
 
     while (true)
     {
-        logger.log(LogLevel::none, "");
+        logger.log(LogLevel::info, "");
         float frequency = monitor.getFrequency();
         float average_frequency = monitor.getAverageFrequency(frequency);
         logger.log(LogLevel::info, "Frequency (Hz): %2.1f%sAverage Frequency (Hz): %2.1f", frequency, WHITESPACE, average_frequency);

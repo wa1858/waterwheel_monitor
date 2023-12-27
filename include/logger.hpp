@@ -10,6 +10,7 @@ const static char *WHITESPACE = "        ";
 enum class LogLevel
 {
     none,
+    debug,
     info,
     warning,
     fatal
@@ -18,7 +19,7 @@ enum class LogLevel
 class Logger
 {
 public:
-    Logger();
+    Logger(LogLevel level = LogLevel::info);
     ~Logger();
     /**
      * Print an output string in a set colour as
@@ -29,12 +30,15 @@ public:
     void log(LogLevel logLevel, const char *message, ...);
 
 private:
+    LogLevel level;
     /**
      * Colour scheme:
+     * Debug: Green text, black background
      * Info: Blue text, black background
      * Warning: Yellow text, black background
      * Fatal: Red text, black background
      */
+    const char *COLOUR_DEBUG = "\x1b[32m";
     const char *COLOUR_INFO = "\x1b[34m";
     const char *COLOUR_WARNING = "\x1b[33m";
     const char *COLOUR_FATAL = "\x1b[31m";
