@@ -193,3 +193,13 @@ float Modbus::getReactivePower()
 {
     return getData(REQUEST_REACTIVE_POWER);
 }
+
+float Modbus::getApparentPower()
+{
+    return getData(REQUEST_APPARENT_POWER);
+}
+
+float Modbus::getPowerFactor()
+{
+    return getData(REQUEST_POWER_FACTOR);
+}

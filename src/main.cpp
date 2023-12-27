@@ -25,25 +25,32 @@ int main()
         logger.log(LogLevel::none, "");
         float frequency = monitor.getFrequency();
         float average_frequency = monitor.getAverageFrequency(frequency);
-        logger.log(LogLevel::info, "Frequency (Hz) %2.1f%sAverage Frequency (Hz) %2.1f", frequency, WHITESPACE, average_frequency);
+        logger.log(LogLevel::info, "Frequency (Hz): %2.1f%sAverage Frequency (Hz): %2.1f", frequency, WHITESPACE, average_frequency);
         monitor.checkAverageFrequency(average_frequency);
 
         float active_power = monitor.getActivePower();
         float average_active_power = monitor.getAverageActivePower(active_power);
-        logger.log(LogLevel::info, "Active Power (W) %2.3f%sAverage Active Power (W) %2.3f", active_power, WHITESPACE, average_active_power);
+        logger.log(LogLevel::info, "Active Power (W): %2.3f%sAverage Active Power (W): %2.3f", active_power, WHITESPACE, average_active_power);
 
         float total_active_energy = monitor.getTotalActiveEnergy();
-        logger.log(LogLevel::info, "Total Active Energy (kWh) %2.0f", total_active_energy);
+        logger.log(LogLevel::info, "Total Active Energy (kWh): %2.0f", total_active_energy);
 
         float voltage = monitor.getVoltage();
-        logger.log(LogLevel::info, "Voltage (V) %2.1f", voltage);
+        logger.log(LogLevel::info, "Voltage (V): %2.1f", voltage);
 
         float current = monitor.getCurrent();
-        logger.log(LogLevel::info, "Current (A) %2.3f", current);
+        logger.log(LogLevel::info, "Current (A): %2.3f", current);
 
         float reactive_power = monitor.getReactivePower();
-        logger.log(LogLevel::info, "Reactive Power (VAr) %2.3f", reactive_power);
+        logger.log(LogLevel::info, "Reactive Power (VAr): %2.3f", reactive_power);
 
+        float apparent_power = monitor.getApparentPower();
+        logger.log(LogLevel::info, "Apparent Power (VA): %2.3f", apparent_power);
+
+        float power_factor = monitor.getPowerFactor();
+        logger.log(LogLevel::info, "Power Factor: %2.3f", power_factor);
+
+        // TODO - Find a better way to do this
         monitor.incrementAverage();
 
         delay(1800);

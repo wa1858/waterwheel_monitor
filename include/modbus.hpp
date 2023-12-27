@@ -24,6 +24,8 @@ public:
     float getVoltage();
     float getCurrent();
     float getReactivePower();
+    float getApparentPower();
+    float getPowerFactor();
     void incrementAverage();
 
 private:

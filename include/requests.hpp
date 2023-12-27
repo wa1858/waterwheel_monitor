@@ -74,3 +74,23 @@ const static std::array<char, 8> REQUEST_REACTIVE_POWER = {
     static_cast<char>(0x02),
     static_cast<char>(0xF1),
     static_cast<char>(0xCC)};
+
+const static std::array<char, 8> REQUEST_APPARENT_POWER = {
+    static_cast<char>(0x01),
+    static_cast<char>(0x04),
+    static_cast<char>(0x00), // Hi byte apparent power
+    static_cast<char>(0x12), // Lo byte apparent power
+    static_cast<char>(0x00),
+    static_cast<char>(0x02),
+    static_cast<char>(0xD1),
+    static_cast<char>(0xCE)};
+
+const static std::array<char, 8> REQUEST_POWER_FACTOR = {
+    static_cast<char>(0x01),
+    static_cast<char>(0x04),
+    static_cast<char>(0x00), // Hi byte power factor
+    static_cast<char>(0x1E), // Lo byte power factor
+    static_cast<char>(0x00),
+    static_cast<char>(0x02),
+    static_cast<char>(0x11),
+    static_cast<char>(0xCD)};
