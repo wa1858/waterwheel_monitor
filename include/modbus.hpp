@@ -26,6 +26,7 @@ public:
     float getReactivePower();
     float getApparentPower();
     float getPowerFactor();
+    float getPhaseAngle();
     void incrementAverage();
 
 private:

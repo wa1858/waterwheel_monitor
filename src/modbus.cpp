@@ -203,3 +203,8 @@ float Modbus::getPowerFactor()
 {
     return getData(REQUEST_POWER_FACTOR);
 }
+
+float Modbus::getPhaseAngle()
+{
+    return getData(REQUEST_PHASE_ANGLE);
+}

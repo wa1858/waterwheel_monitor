@@ -16,7 +16,7 @@ int main()
     int port_number;
     logger.log(LogLevel::info, "Enter the desired serial port number: ");
     std::cin >> port_number;
-    logger.log(LogLevel::info, "Selected port: COM%d", port_number);
+    logger.log(LogLevel::debug, "Selected port: COM%d", port_number);
 
     Modbus monitor = Modbus(port_number, logger);
 
@@ -49,6 +49,9 @@ int main()
 
         float power_factor = monitor.getPowerFactor();
         logger.log(LogLevel::info, "Power Factor: %2.3f", power_factor);
+
+        float phase_angle = monitor.getPhaseAngle();
+        logger.log(LogLevel::info, "Phase Angle (degrees): %2.3f", phase_angle);
 
         // TODO - Find a better way to do this
         monitor.incrementAverage();

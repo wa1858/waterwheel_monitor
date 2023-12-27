@@ -94,3 +94,13 @@ const static std::array<char, 8> REQUEST_POWER_FACTOR = {
     static_cast<char>(0x02),
     static_cast<char>(0x11),
     static_cast<char>(0xCD)};
+
+const static std::array<char, 8> REQUEST_PHASE_ANGLE = {
+    static_cast<char>(0x01),
+    static_cast<char>(0x04),
+    static_cast<char>(0x00), // Hi byte power factor
+    static_cast<char>(0x24), // Lo byte power factor
+    static_cast<char>(0x00),
+    static_cast<char>(0x02),
+    static_cast<char>(0x31),
+    static_cast<char>(0xC0)};
