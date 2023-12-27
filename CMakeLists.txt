@@ -23,5 +23,9 @@ configure_file(
 )
 
 # Add the executable and include the binary directory for the version header
-add_executable(monitor ${SOURCES})
-target_include_directories(monitor PRIVATE "${PROJECT_BINARY_DIR}")
+add_executable(${PROJECT_NAME} ${SOURCES})
+
+# Append version number to the output file name
+set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}_${PROJECT_VERSION}")
+
+target_include_directories(${PROJECT_NAME} PRIVATE "${PROJECT_BINARY_DIR}")
