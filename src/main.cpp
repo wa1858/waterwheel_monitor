@@ -37,7 +37,7 @@ int main()
 
         monitor.incrementAverage();
 
-        delay(200);
+        delay(1800);
     }
 
     return 0;
