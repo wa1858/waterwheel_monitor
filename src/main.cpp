@@ -41,6 +41,9 @@ int main()
         float current = monitor.getCurrent();
         logger.log(LogLevel::info, "Current (A) %2.3f", current);
 
+        float reactive_power = monitor.getReactivePower();
+        logger.log(LogLevel::info, "Reactive Power (VAr) %2.3f", reactive_power);
+
         monitor.incrementAverage();
 
         delay(1800);

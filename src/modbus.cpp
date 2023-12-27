@@ -188,3 +188,8 @@ float Modbus::getCurrent()
 {
     return getData(REQUEST_CURRENT);
 }
+
+float Modbus::getReactivePower()
+{
+    return getData(REQUEST_REACTIVE_POWER);
+}

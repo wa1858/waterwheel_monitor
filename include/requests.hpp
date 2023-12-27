@@ -64,3 +64,13 @@ const static std::array<char, 8> REQUEST_CURRENT = {
     static_cast<char>(0x02),
     static_cast<char>(0x91),
     static_cast<char>(0xCA)};
+
+const static std::array<char, 8> REQUEST_REACTIVE_POWER = {
+    static_cast<char>(0x01),
+    static_cast<char>(0x04),
+    static_cast<char>(0x00), // Hi byte reactive power
+    static_cast<char>(0x18), // Lo byte reactive power
+    static_cast<char>(0x00),
+    static_cast<char>(0x02),
+    static_cast<char>(0xF1),
+    static_cast<char>(0xCC)};

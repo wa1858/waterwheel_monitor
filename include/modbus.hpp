@@ -23,6 +23,7 @@ public:
     float getTotalActiveEnergy();
     float getVoltage();
     float getCurrent();
+    float getReactivePower();
     void incrementAverage();
 
 private:
