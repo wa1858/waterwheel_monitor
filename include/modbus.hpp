@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include "logger.hpp"
+#include "utils.hpp"
 
 const static std::array<char, 8> REQUEST_FREQUENCY = {
     static_cast<char>(0x01),  // address 01
@@ -49,6 +50,7 @@ public:
     float getActivePower();
     float getAverageActivePower(float active_power);
     float getTotalActiveEnergy();
+    void incrementAverage();
 
 private:
     /**
@@ -79,9 +81,11 @@ private:
     constexpr static float FREQUENCY_MIN = 44.5;
     constexpr static float FREQUENCY_MAX = 48.5;
     constexpr static int AVERAGES_ARRAY_SIZE = 10;
-    HANDLE serial;
+
     std::array<float, AVERAGES_ARRAY_SIZE> averaging_frequency_data = {};
     std::array<float, AVERAGES_ARRAY_SIZE> averaging_power_data = {};
     int average_count = 0;
+
+    HANDLE serial;
     Logger &logger;
 };

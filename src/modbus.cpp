@@ -25,19 +25,20 @@ float Modbus::getAverage(float value, std::array<float, AVERAGES_ARRAY_SIZE> &ar
 {
     array[average_count] = value;
     float average = 0.0;
-    if (average_count < AVERAGES_ARRAY_SIZE)
+    for (int i = 0; i < AVERAGES_ARRAY_SIZE; i++)
     {
-        average_count++;
+        average += array[i];
     }
-    else
+    return average / AVERAGES_ARRAY_SIZE;
+}
+
+void Modbus::incrementAverage()
+{
+    average_count++;
+    if (average_count >= AVERAGES_ARRAY_SIZE)
     {
         average_count = 0;
     }
-    for (int i = 0; i < AVERAGES_ARRAY_SIZE; i++)
-    {
-        average += averaging_frequency_data[i];
-    }
-    return average / AVERAGES_ARRAY_SIZE;
 }
 
 int Modbus::writeData(const std::array<char, 8> &request)

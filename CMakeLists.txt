@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.28)
 
 project(waterwheel_monitor
-    VERSION 1.0.5
+    VERSION 1.0.6
     DESCRIPTION "Program for monitoring performance of the waterwheel"
     LANGUAGES CXX)
 
@@ -10,10 +10,7 @@ string(TIMESTAMP BUILD_DATE "%Y-%m-%d %H:%M:%S")
 # Add include directory
 include_directories(include)
 
-# configure a header file to pass some of the CMake settings
-# to the source code
-# configure_file(src/config.h.in config.h)
-
+# Set generator
 set(CMAKE_GENERATOR "Visual Studio 17 2022")
 
 # Add all source files in the 'src' directory
