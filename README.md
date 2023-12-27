@@ -17,9 +17,12 @@ Underspeed threshold at 44.5Hz average and overspeed threshold at 48.5Hz average
 
 ## Dependencies
 - Visual Studio 17 2022
+- MinGW
 - CMake >= 3.28
 
 ## Compilation
+
+This project is written for use on Windows.
 
 To build the project, run the following commands from the project root:
 
@@ -31,7 +34,7 @@ To build the project, run the following commands from the project root:
 
 To run (from within the build folder):
 
-    $ ./Debug/monitor
+    $ ./Debug/waterwheel_monitor_{VERSION_NUMBER}
 
 ## References
 
