@@ -6,12 +6,12 @@
 
 namespace waterwheel::utils
 {
-    const static char *WHITESPACE = "        ";
+    static constexpr char *LOG_WHITESPACE = "        ";
 
     // TODO - Modify Logger to print coloured text in the middle of an output
     enum class LogLevel
     {
-        none,
+        none = 0,
         debug,
         info,
         warning,
@@ -40,10 +40,10 @@ namespace waterwheel::utils
          * Warning: Yellow text, black background
          * Fatal: Red text, black background
          */
-        const char *COLOUR_DEBUG = "\x1b[32m";
-        const char *COLOUR_INFO = "\x1b[34m";
-        const char *COLOUR_WARNING = "\x1b[33m";
-        const char *COLOUR_FATAL = "\x1b[31m";
-        const char *COLOUR_RESET = "\x1b[0m";
+        static constexpr char *COLOUR_DEBUG = "\x1b[32m";
+        static constexpr char *COLOUR_INFO = "\x1b[34m";
+        static constexpr char *COLOUR_WARNING = "\x1b[33m";
+        static constexpr char *COLOUR_FATAL = "\x1b[31m";
+        static constexpr char *COLOUR_RESET = "\x1b[0m";
     };
 }

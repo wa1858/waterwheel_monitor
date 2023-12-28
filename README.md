@@ -36,6 +36,8 @@ To run (from within the build folder):
 
     $ ./src/Debug/waterwheel_monitor
 
+To run the program in debug mode, add the flag `-d` when running
+
 ## References
 
 - https://batchloaf.wordpress.com/2013/02/13/writing-bytes-to-a-serial-port-in-c/   writing data

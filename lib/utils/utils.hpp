@@ -4,7 +4,7 @@
 
 namespace waterwheel::utils
 {
-    static const int defaultDelay = 1800;
+    static constexpr int defaultDelay = 1800;
 
     /**
      * Create time delay as required

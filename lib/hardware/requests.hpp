@@ -1,7 +1,5 @@
 #pragma once
 
-#include <array>
-
 namespace waterwheel::hardware
 {
     /**
@@ -17,7 +15,7 @@ namespace waterwheel::hardware
      * Checksum bytes can be computed using online calculators
      */
 
-    const static std::array<char, 8> REQUEST_FREQUENCY = {
+    static constexpr std::array<char, 8> REQUEST_FREQUENCY = {
         static_cast<char>(0x01),
         static_cast<char>(0x04),
         static_cast<char>(0x00), // Hi byte frequency
@@ -27,7 +25,7 @@ namespace waterwheel::hardware
         static_cast<char>(0x90),
         static_cast<char>(0x1E)};
 
-    const static std::array<char, 8> REQUEST_ACTIVE_POWER = {
+    static constexpr std::array<char, 8> REQUEST_ACTIVE_POWER = {
         static_cast<char>(0x01),
         static_cast<char>(0x04),
         static_cast<char>(0x00), // Hi byte active power
@@ -37,7 +35,7 @@ namespace waterwheel::hardware
         static_cast<char>(0xB1),
         static_cast<char>(0xC8)};
 
-    const static std::array<char, 8> REQUEST_TOTAL_ACTIVE_ENERGY = {
+    static constexpr std::array<char, 8> REQUEST_TOTAL_ACTIVE_ENERGY = {
         static_cast<char>(0x01),
         static_cast<char>(0x04),
         static_cast<char>(0x01), // Hi byte total active energy
@@ -47,7 +45,7 @@ namespace waterwheel::hardware
         static_cast<char>(0x90),
         static_cast<char>(0x27)};
 
-    const static std::array<char, 8> REQUEST_VOLTAGE = {
+    static constexpr std::array<char, 8> REQUEST_VOLTAGE = {
         static_cast<char>(0x01),
         static_cast<char>(0x04),
         static_cast<char>(0x00), // Hi byte voltage
@@ -57,7 +55,7 @@ namespace waterwheel::hardware
         static_cast<char>(0x71),
         static_cast<char>(0xCB)};
 
-    const static std::array<char, 8> REQUEST_CURRENT = {
+    static constexpr std::array<char, 8> REQUEST_CURRENT = {
         static_cast<char>(0x01),
         static_cast<char>(0x04),
         static_cast<char>(0x00), // Hi byte current
@@ -67,7 +65,7 @@ namespace waterwheel::hardware
         static_cast<char>(0x91),
         static_cast<char>(0xCA)};
 
-    const static std::array<char, 8> REQUEST_REACTIVE_POWER = {
+    static constexpr std::array<char, 8> REQUEST_REACTIVE_POWER = {
         static_cast<char>(0x01),
         static_cast<char>(0x04),
         static_cast<char>(0x00), // Hi byte reactive power
@@ -77,7 +75,7 @@ namespace waterwheel::hardware
         static_cast<char>(0xF1),
         static_cast<char>(0xCC)};
 
-    const static std::array<char, 8> REQUEST_APPARENT_POWER = {
+    static constexpr std::array<char, 8> REQUEST_APPARENT_POWER = {
         static_cast<char>(0x01),
         static_cast<char>(0x04),
         static_cast<char>(0x00), // Hi byte apparent power
@@ -87,7 +85,7 @@ namespace waterwheel::hardware
         static_cast<char>(0xD1),
         static_cast<char>(0xCE)};
 
-    const static std::array<char, 8> REQUEST_POWER_FACTOR = {
+    static constexpr std::array<char, 8> REQUEST_POWER_FACTOR = {
         static_cast<char>(0x01),
         static_cast<char>(0x04),
         static_cast<char>(0x00), // Hi byte power factor
@@ -97,7 +95,7 @@ namespace waterwheel::hardware
         static_cast<char>(0x11),
         static_cast<char>(0xCD)};
 
-    const static std::array<char, 8> REQUEST_PHASE_ANGLE = {
+    static constexpr std::array<char, 8> REQUEST_PHASE_ANGLE = {
         static_cast<char>(0x01),
         static_cast<char>(0x04),
         static_cast<char>(0x00), // Hi byte power factor

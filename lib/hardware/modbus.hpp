@@ -2,9 +2,6 @@
 
 #include <array>
 #include <windows.h>
-#include <sstream>
-#include <iostream>
-#include <string.h>
 
 #include <utils/logger.hpp>
 #include <utils/utils.hpp>
@@ -15,7 +12,7 @@ namespace waterwheel::hardware
     class Modbus
     {
     public:
-        Modbus(int port_number, waterwheel::utils::Logger &logger);
+        Modbus(int port_number, utils::Logger &logger);
         ~Modbus();
         float getFrequency();
         float getAverageFrequency(float frequency);
@@ -57,15 +54,15 @@ namespace waterwheel::hardware
         float convertDataToFloat(const std::array<char, 9> &bytes_to_read);
 
     private:
-        constexpr static float FREQUENCY_MIN = 44.5;
-        constexpr static float FREQUENCY_MAX = 48.5;
-        constexpr static int AVERAGES_ARRAY_SIZE = 10;
+        static constexpr float FREQUENCY_MIN = 44.5;
+        static constexpr float FREQUENCY_MAX = 48.5;
+        static constexpr int AVERAGES_ARRAY_SIZE = 10;
 
         std::array<float, AVERAGES_ARRAY_SIZE> averaging_frequency_data = {};
         std::array<float, AVERAGES_ARRAY_SIZE> averaging_power_data = {};
         int average_count = 0;
 
         HANDLE serial;
-        waterwheel::utils::Logger &logger;
+        utils::Logger &logger;
     };
 }
