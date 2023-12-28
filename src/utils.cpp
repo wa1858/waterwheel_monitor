@@ -1,11 +1,14 @@
 #include "utils.hpp"
 
-void delay(int milli_seconds)
+namespace waterwheel::utils
 {
-    // Storing start time
-    clock_t start_time = clock();
+    void delay(int milli_seconds)
+    {
+        // Storing start time
+        clock_t start_time = clock();
 
-    // Loop for required time
-    while (clock() < start_time + milli_seconds)
-        ;
+        // Loop for required time
+        while (clock() < start_time + milli_seconds)
+            ;
+    }
 }

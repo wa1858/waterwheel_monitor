@@ -5,58 +5,60 @@
 #include "utils.hpp"
 #include "config.h"
 
+using namespace waterwheel;
+
 int main()
 {
-    Logger logger = Logger(LogLevel::debug);
-    logger.log(LogLevel::info, "Waterwheel Monitoring Program");
-    logger.log(LogLevel::debug, "Revision %d.%d.%d", PROJECT_VERSION_MAJOR, PROJECT_VERSION_MINOR, PROJECT_VERSION_PATCH);
-    logger.log(LogLevel::debug, "Build Date: %s", BUILD_DATE);
+    utils::Logger logger = utils::Logger(utils::LogLevel::debug);
+    logger.log(utils::LogLevel::info, "Waterwheel Monitoring Program");
+    logger.log(utils::LogLevel::debug, "Revision %d.%d.%d", PROJECT_VERSION_MAJOR, PROJECT_VERSION_MINOR, PROJECT_VERSION_PATCH);
+    logger.log(utils::LogLevel::debug, "Build Date: %s", BUILD_DATE);
 
     // TODO - Imput validation
     int port_number;
-    logger.log(LogLevel::info, "Enter the desired serial port number: ");
+    logger.log(utils::LogLevel::info, "Enter the desired serial port number: ");
     std::cin >> port_number;
-    logger.log(LogLevel::debug, "Selected port: COM%d", port_number);
+    logger.log(utils::LogLevel::debug, "Selected port: COM%d", port_number);
 
-    Modbus monitor = Modbus(port_number, logger);
+    hardware::Modbus monitor = hardware::Modbus(port_number, logger);
 
     while (true)
     {
-        logger.log(LogLevel::info, "");
+        logger.log(utils::LogLevel::info, "");
         float frequency = monitor.getFrequency();
         float average_frequency = monitor.getAverageFrequency(frequency);
-        logger.log(LogLevel::info, "Frequency (Hz): %2.1f%sAverage Frequency (Hz): %2.1f", frequency, WHITESPACE, average_frequency);
+        logger.log(utils::LogLevel::info, "Frequency (Hz): %2.1f%sAverage Frequency (Hz): %2.1f", frequency, utils::WHITESPACE, average_frequency);
         monitor.checkAverageFrequency(average_frequency);
 
         float active_power = monitor.getActivePower();
         float average_active_power = monitor.getAverageActivePower(active_power);
-        logger.log(LogLevel::info, "Active Power (W): %2.3f%sAverage Active Power (W): %2.3f", active_power, WHITESPACE, average_active_power);
+        logger.log(utils::LogLevel::info, "Active Power (W): %2.3f%sAverage Active Power (W): %2.3f", active_power, utils::WHITESPACE, average_active_power);
 
         float total_active_energy = monitor.getTotalActiveEnergy();
-        logger.log(LogLevel::info, "Total Active Energy (kWh): %2.0f", total_active_energy);
+        logger.log(utils::LogLevel::info, "Total Active Energy (kWh): %2.0f", total_active_energy);
 
         float voltage = monitor.getVoltage();
-        logger.log(LogLevel::info, "Voltage (V): %2.1f", voltage);
+        logger.log(utils::LogLevel::info, "Voltage (V): %2.1f", voltage);
 
         float current = monitor.getCurrent();
-        logger.log(LogLevel::info, "Current (A): %2.3f", current);
+        logger.log(utils::LogLevel::info, "Current (A): %2.3f", current);
 
         float reactive_power = monitor.getReactivePower();
-        logger.log(LogLevel::info, "Reactive Power (VAr): %2.3f", reactive_power);
+        logger.log(utils::LogLevel::info, "Reactive Power (VAr): %2.3f", reactive_power);
 
         float apparent_power = monitor.getApparentPower();
-        logger.log(LogLevel::info, "Apparent Power (VA): %2.3f", apparent_power);
+        logger.log(utils::LogLevel::info, "Apparent Power (VA): %2.3f", apparent_power);
 
         float power_factor = monitor.getPowerFactor();
-        logger.log(LogLevel::info, "Power Factor: %2.3f", power_factor);
+        logger.log(utils::LogLevel::info, "Power Factor: %2.3f", power_factor);
 
         float phase_angle = monitor.getPhaseAngle();
-        logger.log(LogLevel::info, "Phase Angle (degrees): %2.3f", phase_angle);
+        logger.log(utils::LogLevel::info, "Phase Angle (degrees): %2.3f", phase_angle);
 
         // TODO - Find a better way to do this
         monitor.incrementAverage();
 
-        delay(1800);
+        utils::delay(1800);
     }
 
     return 0;

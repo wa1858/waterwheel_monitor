@@ -1,9 +1,11 @@
 cmake_minimum_required(VERSION 3.28)
 
 project(waterwheel_monitor
-    VERSION 1.0.66
+    VERSION 1.0.7
     DESCRIPTION "Program for monitoring performance of the waterwheel"
     LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 17)
 
 string(TIMESTAMP BUILD_DATE "%Y-%m-%d %H:%M:%S")
 
