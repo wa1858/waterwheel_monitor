@@ -43,12 +43,12 @@ int main(int argc, char *argv[])
         logger.log(utils::LogLevel::info, "");
         float frequency = monitor.getFrequency();
         float average_frequency = monitor.getAverageFrequency(frequency);
-        logger.log(utils::LogLevel::info, "Frequency (Hz):              %2.1f   Average Frequency (Hz):     %2.1f", frequency, utils::LOG_WHITESPACE, average_frequency);
+        logger.log(utils::LogLevel::info, "Frequency (Hz):              %2.1f   Average Frequency (Hz):     %2.1f", frequency, average_frequency);
         monitor.checkAverageFrequency(average_frequency);
 
         float active_power = monitor.getActivePower();
         float average_active_power = monitor.getAverageActivePower(active_power);
-        logger.log(utils::LogLevel::info, "Active Power (W):            %2.3f   Average Active Power (W):   %2.3f", active_power, utils::LOG_WHITESPACE, average_active_power);
+        logger.log(utils::LogLevel::info, "Active Power (W):            %2.3f   Average Active Power (W):   %2.3f", active_power, average_active_power);
 
         float total_active_energy = monitor.getTotalActiveEnergy();
         logger.log(utils::LogLevel::info, "Total Active Energy (kWh):   %2.0f", total_active_energy);

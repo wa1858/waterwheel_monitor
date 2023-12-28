@@ -23,9 +23,9 @@ namespace waterwheel::utils
 
     void Logger::log(LogLevel logLevel, const char *message, ...)
     {
-        std::cout << "[" << getTimeStamp() << "] ";
         if (this->level <= logLevel)
         {
+            std::cout << "[" << getTimeStamp() << "] ";
             FILE *file = stdout;
             switch (logLevel)
             {
