@@ -1,15 +1,22 @@
 // Program to monitor performance of the waterwheel
 
+#include <cstring>
+
 #include <hardware/modbus.hpp>
 #include <utils/logger.hpp>
 #include <utils/utils.hpp>
+#include <utils/debug.hpp>
 // #include "config.h"
 
 using namespace waterwheel;
 
-int main()
+int main(int argc, char *argv[])
 {
-    utils::Logger logger = utils::Logger(utils::LogLevel::debug);
+    bool debugMode = argc > 1 && strcmp(argv[0], utils::DEBUG_FLAG);
+    utils::LogLevel level = debugMode ? utils::LogLevel::debug : utils::LogLevel::info;
+
+    utils::Logger logger = utils::Logger(level);
+
     logger.log(utils::LogLevel::info, "Waterwheel Monitoring Program");
     // TODO - Restructure CMakeLists.txt to allow inclusion of config.h in build
     // logger.log(utils::LogLevel::debug, "Revision %d.%d.%d", PROJECT_VERSION_MAJOR, PROJECT_VERSION_MINOR, PROJECT_VERSION_PATCH);
@@ -20,6 +27,13 @@ int main()
     logger.log(utils::LogLevel::info, "Enter the desired serial port number: ");
     std::cin >> port_number;
     logger.log(utils::LogLevel::debug, "Selected port: COM%d", port_number);
+
+    int delayAmount = utils::defaultDelay;
+
+    if (debugMode)
+    {
+        utils::debugConfigureDelay(logger, &delayAmount);
+    }
 
     hardware::Modbus monitor = hardware::Modbus(port_number, logger);
 
@@ -59,7 +73,7 @@ int main()
         // TODO - Find a better way to do this
         monitor.incrementAverage();
 
-        utils::delay(1800);
+        utils::delay(delayAmount);
     }
 
     return 0;
