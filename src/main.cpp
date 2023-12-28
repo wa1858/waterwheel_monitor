@@ -16,12 +16,12 @@ int main()
     // logger.log(utils::LogLevel::debug, "Build Date: %s", BUILD_DATE);
 
     // TODO - Imput validation
-    int port_number;
+    int portNumber;
     logger.log(utils::LogLevel::info, "Enter the desired serial port number: ");
-    std::cin >> port_number;
-    logger.log(utils::LogLevel::debug, "Selected port: COM%d", port_number);
+    std::cin >> portNumber;
+    logger.log(utils::LogLevel::debug, "Selected port: COM%d", portNumber);
 
-    hardware::Modbus monitor = hardware::Modbus(port_number, logger);
+    hardware::Modbus monitor = hardware::Modbus(logger, portNumber);
 
     while (true)
     {

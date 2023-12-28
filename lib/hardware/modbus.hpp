@@ -1,21 +1,20 @@
 #pragma once
 
 #include <array>
-#include <windows.h>
 #include <sstream>
 #include <iostream>
-#include <string.h>
 
+#include <hardware/serial.hpp>
+#include <hardware/requests.hpp>
 #include <utils/logger.hpp>
 #include <utils/utils.hpp>
-#include "requests.hpp"
 
 namespace waterwheel::hardware
 {
     class Modbus
     {
     public:
-        Modbus(int port_number, waterwheel::utils::Logger &logger);
+        Modbus(utils::Logger &logger_, int port_number);
         ~Modbus();
         float getFrequency();
         float getAverageFrequency(float frequency);
@@ -41,14 +40,6 @@ namespace waterwheel::hardware
         float getData(const std::array<char, 8> &request);
 
         float getAverage(float value, std::array<float, 10> &array);
-
-        int writeData(const std::array<char, 8> &request);
-
-        bool readData(std::array<char, 9> &bytes_to_read);
-        /**
-         * Create a HANDLE variable for accessing the serial port
-         */
-        HANDLE setupSerial(int port_number);
         /**
          * Converts four char bytes to an equivalent 32-bit float
          * Implemnted as the energy meter generates data in floating
@@ -65,7 +56,7 @@ namespace waterwheel::hardware
         std::array<float, AVERAGES_ARRAY_SIZE> averaging_power_data = {};
         int average_count = 0;
 
-        HANDLE serial;
-        waterwheel::utils::Logger &logger;
+        Serial serial;
+        utils::Logger &logger;
     };
 }
