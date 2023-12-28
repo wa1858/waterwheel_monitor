@@ -11,6 +11,7 @@ namespace waterwheel::utils
         this->log(LogLevel::debug, "Logger destroyed");
     }
 
+    // TODO - Print to the millisecond
     std::string Logger::getTimeStamp()
     {
         auto now = std::chrono::system_clock::now();

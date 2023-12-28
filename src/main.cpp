@@ -1,5 +1,3 @@
-// Program to monitor performance of the waterwheel
-
 #include <cstring>
 
 #include <hardware/modbus.hpp>
@@ -34,15 +32,20 @@ int main(int argc, char *argv[])
     if (debugMode)
     {
         utils::debugConfigureDelay(logger, &delayAmount);
+        // TODO - utils::debugSetFrequencyLimits();
     }
 
     hardware::Modbus monitor = hardware::Modbus(port_number, logger);
 
+    // TODO - Can this big loop with print statements be cleaned up?
     while (true)
     {
-        logger.log(utils::LogLevel::info, "");
+        // Break between each record
+        std::cout << std::endl;
+
         float frequency = monitor.getFrequency();
         float average_frequency = monitor.getAverageFrequency(frequency);
+        // TODO - The centering of the output prints is done using tabs here; is there a better way?
         logger.log(utils::LogLevel::info, "Frequency (Hz):              %2.1f   Average Frequency (Hz):     %2.1f", frequency, average_frequency);
         monitor.checkAverageFrequency(average_frequency);
 
