@@ -1,9 +1,9 @@
 // Program to monitor performance of the waterwheel
 
-#include "modbus.hpp"
-#include "logger.hpp"
-#include "utils.hpp"
-#include "config.h"
+#include <hardware/modbus.hpp>
+#include <utils/logger.hpp>
+#include <utils/utils.hpp>
+// #include "config.h"
 
 using namespace waterwheel;
 
@@ -11,8 +11,9 @@ int main()
 {
     utils::Logger logger = utils::Logger(utils::LogLevel::debug);
     logger.log(utils::LogLevel::info, "Waterwheel Monitoring Program");
-    logger.log(utils::LogLevel::debug, "Revision %d.%d.%d", PROJECT_VERSION_MAJOR, PROJECT_VERSION_MINOR, PROJECT_VERSION_PATCH);
-    logger.log(utils::LogLevel::debug, "Build Date: %s", BUILD_DATE);
+    // TODO - Restructure CMakeLists.txt to allow inclusion of config.h in build
+    // logger.log(utils::LogLevel::debug, "Revision %d.%d.%d", PROJECT_VERSION_MAJOR, PROJECT_VERSION_MINOR, PROJECT_VERSION_PATCH);
+    // logger.log(utils::LogLevel::debug, "Build Date: %s", BUILD_DATE);
 
     // TODO - Imput validation
     int port_number;

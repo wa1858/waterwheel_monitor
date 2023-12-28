@@ -6,8 +6,8 @@
 #include <iostream>
 #include <string.h>
 
-#include "logger.hpp"
-#include "utils.hpp"
+#include <utils/logger.hpp>
+#include <utils/utils.hpp>
 #include "requests.hpp"
 
 namespace waterwheel::hardware
