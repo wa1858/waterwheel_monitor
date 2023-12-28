@@ -2,7 +2,9 @@
 
 #include <stdarg.h>
 #include <iostream>
+#include <iomanip> // put_time
 #include <sstream>
+#include <chrono>
 
 namespace waterwheel::utils
 {
@@ -32,6 +34,8 @@ namespace waterwheel::utils
         void log(LogLevel logLevel, const char *message, ...);
 
     private:
+        std::string getTimeStamp();
+
         LogLevel level;
         /**
          * Colour scheme:
