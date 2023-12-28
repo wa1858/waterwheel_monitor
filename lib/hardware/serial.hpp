@@ -15,6 +15,12 @@ namespace waterwheel::hardware
         ~Serial();
 
         /**
+         * Select the serial port to be used at the start of the program
+         * @returns The port number to be used
+         */
+        static int selectSerialPort(utils::Logger &logger);
+
+        /**
          * Send a data request through the serial port
          * @param request   Array of hex values corresponding to
          *                  desired data request
@@ -34,6 +40,8 @@ namespace waterwheel::hardware
          * @returns An object referencing the opened COM port
          */
         HANDLE setUpSerial(int portNumber);
+
+        // TODO - static getSerialPorts();
 
     private:
         utils::Logger &logger;

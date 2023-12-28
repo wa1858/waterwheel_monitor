@@ -1,6 +1,7 @@
 // Program to monitor performance of the waterwheel
 
 #include <hardware/modbus.hpp>
+#include <hardware/serial.hpp>
 #include <utils/logger.hpp>
 #include <utils/utils.hpp>
 // #include "config.h"
@@ -15,11 +16,7 @@ int main()
     // logger.log(utils::LogLevel::debug, "Revision %d.%d.%d", PROJECT_VERSION_MAJOR, PROJECT_VERSION_MINOR, PROJECT_VERSION_PATCH);
     // logger.log(utils::LogLevel::debug, "Build Date: %s", BUILD_DATE);
 
-    // TODO - Imput validation
-    int portNumber;
-    logger.log(utils::LogLevel::info, "Enter the desired serial port number: ");
-    std::cin >> portNumber;
-    logger.log(utils::LogLevel::debug, "Selected port: COM%d", portNumber);
+    int portNumber = hardware::Serial::selectSerialPort(logger);
 
     hardware::Modbus monitor = hardware::Modbus(logger, portNumber);
 

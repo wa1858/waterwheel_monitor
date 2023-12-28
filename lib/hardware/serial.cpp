@@ -14,6 +14,19 @@ namespace waterwheel::hardware
         logger.log(utils::LogLevel::debug, "Serial destroyed");
     }
 
+    int Serial::selectSerialPort(utils::Logger &logger)
+    {
+        // TODO - Use getSerialPorts() here present list of ports to user
+        // TODO - Imput validation
+        int portNumber;
+        std::cout << "Enter the desired serial port number: ";
+        std::cin >> portNumber;
+        logger.log(utils::LogLevel::debug, "Selected port: COM%d", portNumber);
+        return portNumber;
+    }
+
+    // TODO - getSerialPorts();
+
     HANDLE Serial::setUpSerial(int portNumber)
     {
         // Declare variables and structures
