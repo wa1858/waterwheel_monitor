@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
 
     // TODO - Imput validation
     int port_number;
-    logger.log(utils::LogLevel::info, "Enter the desired serial port number: ");
+    std::cout << "Enter the desired serial port number: ";
     std::cin >> port_number;
     logger.log(utils::LogLevel::debug, "Selected port: COM%d", port_number);
 
