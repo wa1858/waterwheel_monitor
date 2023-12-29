@@ -1,53 +1,48 @@
 #pragma once
 
 #include <stdarg.h>
-#include <iostream>
-#include <iomanip>
-#include <sstream>
+
 #include <chrono>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
 
-namespace waterwheel::utils
-{
-    static constexpr char *LOG_WHITESPACE = "        ";
+namespace waterwheel::utils {
+constexpr static char *kWhitespace = "        ";
 
-    // TODO - Modify Logger to print coloured text in the middle of an output
-    enum class LogLevel
-    {
-        none = 0,
-        debug,
-        info,
-        warning,
-        fatal
-    };
+/**
+ * kDebug: Additional info for debugging (object created, value set, etc)
+ * kInfo: Useful info for user (readouts from the meter)
+ * kWarning: Non-fatal errors for user (meter reading failed)
+ * kfatal: Error which stops the program (serial failed to open)
+ */
+enum class LogLevel { kNone = 0, kDebug, kInfo, kWarning, kFatal };
 
-    class Logger
-    {
-    public:
-        Logger(LogLevel level = LogLevel::info);
-        ~Logger();
-        /**
-         * Print an output string in a set colour as
-         * defined by the log level
-         * @param logLevel  Logging level for message
-         * @param message   Message to be printed
-         */
-        void log(LogLevel logLevel, const char *message, ...);
+class Logger {
+ public:
+  Logger(LogLevel level = LogLevel::kInfo);
+  ~Logger();
 
-    private:
-        std::string getTimeStamp();
+  // TODO - Modify log() to print coloured text in the middle of an output
+  /**
+   * @brief Print an output string in a set colour as defined by the log level
+   */
+  void log(LogLevel logLevel, const char *message, ...);
 
-        LogLevel level;
-        /**
-         * Colour scheme:
-         * Debug: Green text, black background
-         * Info: Blue text, black background
-         * Warning: Yellow text, black background
-         * Fatal: Red text, black background
-         */
-        static constexpr char *COLOUR_DEBUG = "\x1b[32m";
-        static constexpr char *COLOUR_INFO = "\x1b[34m";
-        static constexpr char *COLOUR_WARNING = "\x1b[33m";
-        static constexpr char *COLOUR_FATAL = "\x1b[31m";
-        static constexpr char *COLOUR_RESET = "\x1b[0m";
-    };
-}
+ private:
+  std::string getTimeStamp();
+
+  LogLevel level_;
+  /**
+   * Debug: Green text, black background
+   * Info: Blue text, black background
+   * Warning: Yellow text, black background
+   * Fatal: Red text, black background
+   */
+  static constexpr char *kColourFormatDebug = "\x1b[32m";
+  static constexpr char *kColourFormatInfo = "\x1b[34m";
+  static constexpr char *kColourFormatWarning = "\x1b[33m";
+  static constexpr char *kColourFormatFatal = "\x1b[31m";
+  static constexpr char *kColourFormatReset = "\x1b[0m";
+};
+}  // namespace waterwheel::utils

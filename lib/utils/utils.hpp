@@ -2,13 +2,11 @@
 
 #include <time.h>
 
-namespace waterwheel::utils
-{
-    static constexpr int defaultDelay = 1800;
+namespace waterwheel::utils {
+constexpr static int kDefaultDelay = 1800;
 
-    /**
-     * Create time delay as required
-     * @param milli_seconds Length of delay required
-     */
-    void delay(int milli_seconds);
-}
+/**
+ * @brief Create a time delay as required
+ */
+void delay(int milli_seconds);
+}  // namespace waterwheel::utils

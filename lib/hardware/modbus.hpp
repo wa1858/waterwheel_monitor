@@ -1,68 +1,88 @@
 #pragma once
 
-#include <array>
+#include <string.h>
 #include <windows.h>
 
+#include <array>
+#include <hardware/requests.hpp>
+#include <iostream>
+#include <sstream>
 #include <utils/logger.hpp>
 #include <utils/utils.hpp>
-#include "requests.hpp"
 
-namespace waterwheel::hardware
-{
-    class Modbus
-    {
-    public:
-        Modbus(int port_number, utils::Logger &logger);
-        ~Modbus();
-        float getFrequency();
-        float getAverageFrequency(float frequency);
-        void checkAverageFrequency(float average_frequency);
-        float getActivePower();
-        float getAverageActivePower(float active_power);
-        float getTotalActiveEnergy();
-        float getVoltage();
-        float getCurrent();
-        float getReactivePower();
-        float getApparentPower();
-        float getPowerFactor();
-        float getPhaseAngle();
-        void incrementAverage();
+namespace waterwheel::hardware {
 
-    private:
-        /**
-         * Wrapper function for all MODBUS requests
-         * @param request   Array of chars required to retrieve
-         *                  data from MODBUS
-         * @returns Float value read from meter
-         */
-        float getData(const std::array<char, 8> &request);
+class Modbus {
+ public:
+  Modbus(int port_number, utils::Logger &logger);
+  ~Modbus();
+  float getFrequency();
+  float getActivePower();
+  float getTotalActiveEnergy();
+  float getVoltage();
+  float getCurrent();
+  float getReactivePower();
+  float getApparentPower();
+  float getPowerFactor();
+  float getPhaseAngle();
+  /**
+   * @brief Use a set number of previous readings (kSizeOfAverageArrays) to
+   * determine the average frequency.
+   */
+  float getAverageFrequency(float frequency);
+  /**
+   * @brief Use a set number of previous readings (kSizeOfAverageArrays) to
+   * determine the average active power.
+   */
+  float getAverageActivePower(float active_power);
+  /**
+   * @brief Check that the average frequency is within the upper and lower
+   * limits defined by kFrequencyMax and kFrequencyMin. If outwith these limits,
+   * warn the user.
+   */
+  void checkAverageFrequency(float average_frequency);
 
-        float getAverage(float value, std::array<float, 10> &array);
+  /**
+   * @brief Increment the Class-defined array index for average value arrays
+   */
+  void incrementAverage();
 
-        int writeData(const std::array<char, 8> &request);
+ private:
+  /**
+   * @brief Send a defined request frame to the meter through MODBUS, retrieve
+   * the response from the meter, and convert the result into a float.
+   */
+  float getData(const std::array<char, 8> &request);
 
-        bool readData(std::array<char, 9> &bytes_to_read);
-        /**
-         * Create a HANDLE variable for accessing the serial port
-         */
-        HANDLE setupSerial(int port_number);
-        /**
-         * Converts four char bytes to an equivalent 32-bit float
-         * Implemnted as the energy meter generates data in floating
-         * point format but program reads data as four distinct bytes
-         */
-        float convertDataToFloat(const std::array<char, 9> &bytes_to_read);
+  /**
+   * @brief Determine the average value of the elements of an array. Used for
+   * calculating average frequency and active power
+   */
+  float getAverage(float value, std::array<float, 10> &array);
 
-    private:
-        static constexpr float FREQUENCY_MIN = 44.5;
-        static constexpr float FREQUENCY_MAX = 48.5;
-        static constexpr int AVERAGES_ARRAY_SIZE = 10;
+  int writeData(const std::array<char, 8> &request);
 
-        std::array<float, AVERAGES_ARRAY_SIZE> averaging_frequency_data = {};
-        std::array<float, AVERAGES_ARRAY_SIZE> averaging_power_data = {};
-        int average_count = 0;
+  bool readData(std::array<char, 9> &bytes_to_read);
+  /**
+   * @brief Create a HANDLE variable for accessing the serial port
+   */
+  HANDLE setupSerial(int port_number);
+  /**
+   * @brief Converts four char bytes to an equivalent 32-bit float. Implemnted
+   * as the energy meter generates data in floating point format but program
+   * reads data as four distinct bytes
+   */
+  float convertDataToFloat(const std::array<char, 9> &bytes_to_read);
 
-        HANDLE serial;
-        utils::Logger &logger;
-    };
-}
+ private:
+  constexpr static int kSizeOfAverageArrays = 10;
+  constexpr static float kFrequencyMin = 44.5;
+  constexpr static float kFrequencyMax = 48.5;
+  std::array<float, kSizeOfAverageArrays> averaging_frequency_data_ = {};
+  std::array<float, kSizeOfAverageArrays> averaging_power_data_ = {};
+  int average_count_ = 0;
+
+  HANDLE serial_;
+  utils::Logger &logger_;
+};
+}  // namespace waterwheel::hardware
