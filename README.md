@@ -34,7 +34,7 @@ To build the project, run the following commands from the project root:
 
 To run (from within the build folder):
 
-    $ ./src/Debug/waterwheel_monitor
+    $ ./Debug/waterwheel_monitor
 
 ## References
 
