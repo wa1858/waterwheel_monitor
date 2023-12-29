@@ -4,6 +4,7 @@
 #include <utils/debug.hpp>
 #include <utils/logger.hpp>
 #include <utils/utils.hpp>
+
 // #include "config.h"
 
 int main(int argc, char *argv[]) {
@@ -18,9 +19,11 @@ int main(int argc, char *argv[]) {
   logger.log(waterwheel::utils::LogLevel::kInfo,
              "Waterwheel Monitoring Program");
   // TODO - Restructure CMakeLists.txt to allow inclusion of config.h in build
-  // logger.log(utils::LogLevel::debug, "Revision %d.%d.%d",
-  // PROJECT_VERSION_MAJOR, PROJECT_VERSION_MINOR, PROJECT_VERSION_PATCH);
-  // logger.log(utils::LogLevel::debug, "Build Date: %s", BUILD_DATE);
+  // logger.log(waterwheel::utils::LogLevel::kDebug, "Revision %d.%d.%d",
+  //  PROJECT_VERSION_MAJOR, PROJECT_VERSION_MINOR,
+  //  PROJECT_VERSION_PATCH);
+  // logger.log(waterwheel::utils::LogLevel::kDebug, "Build Date: %s",
+  // BUILD_DATE);
 
   // TODO - Imput validation
   int port_number;
