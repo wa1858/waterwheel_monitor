@@ -11,11 +11,11 @@ int main(int argc, char *argv[]) {
   // Determine if debug mode is enabled
   bool debugMode = argc > 1 && strcmp(argv[0], utils::DEBUG_FLAG);
   utils::LogLevel level =
-      debugMode ? utils::LogLevel::debug : utils::LogLevel::info;
+      debugMode ? utils::LogLevel::kDebug : utils::LogLevel::kInfo;
 
   utils::Logger logger = utils::Logger(level);
 
-  logger.log(utils::LogLevel::info, "Waterwheel Monitoring Program");
+  logger.log(utils::LogLevel::kInfo, "Waterwheel Monitoring Program");
   // TODO - Restructure CMakeLists.txt to allow inclusion of config.h in build
   // logger.log(utils::LogLevel::debug, "Revision %d.%d.%d",
   // PROJECT_VERSION_MAJOR, PROJECT_VERSION_MINOR, PROJECT_VERSION_PATCH);
@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
   int port_number;
   std::cout << "Enter the desired serial port number: ";
   std::cin >> port_number;
-  logger.log(utils::LogLevel::debug, "Selected port: COM%d", port_number);
+  logger.log(utils::LogLevel::kDebug, "Selected port: COM%d", port_number);
 
   int delayAmount = utils::kDefaultDelay;
 
@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
     float average_frequency = monitor.getAverageFrequency(frequency);
     // TODO - The centering of the output prints is done using tabs here; is
     // there a better way?
-    logger.log(utils::LogLevel::info,
+    logger.log(utils::LogLevel::kInfo,
                "Frequency (Hz):              %2.1f   Average Frequency (Hz):   "
                "  %2.1f",
                frequency, average_frequency);

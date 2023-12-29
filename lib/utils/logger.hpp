@@ -8,7 +8,7 @@
 #include <sstream>
 
 namespace waterwheel::utils {
-constexpr static char *kWhitespace = "        ";
+constexpr static const char *kWhitespace = "        ";
 
 /**
  * kDebug: Additional info for debugging (object created, value set, etc)
@@ -39,10 +39,10 @@ class Logger {
    * Warning: Yellow text, black background
    * Fatal: Red text, black background
    */
-  static constexpr char *kColourFormatDebug = "\x1b[32m";
-  static constexpr char *kColourFormatInfo = "\x1b[34m";
-  static constexpr char *kColourFormatWarning = "\x1b[33m";
-  static constexpr char *kColourFormatFatal = "\x1b[31m";
-  static constexpr char *kColourFormatReset = "\x1b[0m";
+  constexpr static const char *kColourFormatDebug = "\x1b[32m";
+  constexpr static const char *kColourFormatInfo = "\x1b[34m";
+  constexpr static const char *kColourFormatWarning = "\x1b[33m";
+  constexpr static const char *kColourFormatFatal = "\x1b[31m";
+  constexpr static const char *kColourFormatReset = "\x1b[0m";
 };
 }  // namespace waterwheel::utils
