@@ -2,16 +2,16 @@
 
 namespace waterwheel::utils {
 Logger::Logger(LogLevel level) : level_(level) {
-  this->createLogFile();
-  this->log(LogLevel::kDebug, "Logger created");
+  createLogFile();
+  log(LogLevel::kDebug, "Logger created");
 }
 Logger::~Logger() {
-  this->log(LogLevel::kDebug, "Logger destroyed");
-  fclose(this->log_file_);
+  log(LogLevel::kDebug, "Logger destroyed");
+  fclose(log_file_);
 }
 
 void Logger::log(LogLevel logLevel, const char *message, ...) {
-  if (this->level_ <= logLevel) {
+  if (level_ <= logLevel) {
     std::string time = "[" + getTimeStamp() + "] ";
     std::string head, head_coloured;
 
@@ -77,8 +77,8 @@ std::string Logger::getTimeStamp() {
 void Logger::createLogFile() {
   if (!std::filesystem::exists(kLogFileDirectory)) {
     std::filesystem::create_directory(kLogFileDirectory);
-    this->log(LogLevel::kDebug, "Log file directory created at .\\%s",
-              kLogFileDirectory.c_str());
+    log(LogLevel::kDebug, "Log file directory created at .\\%s",
+        kLogFileDirectory.c_str());
   }
 
   // Get the current date for use in the name of the log file
@@ -94,10 +94,10 @@ void Logger::createLogFile() {
   // Open the file, appending if it already exists
   log_file_ = fopen(log_file_path.c_str(), "a");
   if (log_file_ == nullptr) {
-    this->log(LogLevel::kWarning, "Unable to create log file on disk");
+    log(LogLevel::kWarning, "Unable to create log file on disk");
     return;
   }
-  this->log(LogLevel::kDebug, "Log File Opened: %s", log_file_path.c_str());
+  log(LogLevel::kDebug, "Log File Opened: %s", log_file_path.c_str());
 }
 
 }  // namespace waterwheel::utils

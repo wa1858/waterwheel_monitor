@@ -3,12 +3,12 @@
 namespace waterwheel::hardware {
 Modbus::Modbus(utils::Logger &logger, int port_number)
     : logger_(logger), serial_(logger, port_number) {
-  this->logger_.log(utils::LogLevel::kDebug, "New Modbus created");
+  logger_.log(utils::LogLevel::kDebug, "New Modbus created");
 }
 
 Modbus::~Modbus() {
-  this->serial_.~Serial();
-  this->logger_.log(utils::LogLevel::kDebug, "Modbus object destroyed");
+  serial_.~Serial();
+  logger_.log(utils::LogLevel::kDebug, "Modbus object destroyed");
 }
 
 float Modbus::getData(const std::array<char, 8> &request) {
