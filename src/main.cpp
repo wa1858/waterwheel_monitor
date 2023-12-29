@@ -1,21 +1,22 @@
 #include <cstring>
 #include <hardware/modbus.hpp>
+#include <hardware/serial.hpp>
 #include <utils/debug.hpp>
 #include <utils/logger.hpp>
 #include <utils/utils.hpp>
 // #include "config.h"
 
-using namespace waterwheel;
-
 int main(int argc, char *argv[]) {
   // Determine if debug mode is enabled
-  bool debugMode = argc > 1 && strcmp(argv[0], utils::DEBUG_FLAG);
-  utils::LogLevel level =
-      debugMode ? utils::LogLevel::kDebug : utils::LogLevel::kInfo;
+  bool debug_mode = argc > 1 && strcmp(argv[0], waterwheel::utils::kDebugFlag);
+  waterwheel::utils::LogLevel level = debug_mode
+                                          ? waterwheel::utils::LogLevel::kDebug
+                                          : waterwheel::utils::LogLevel::kInfo;
 
-  utils::Logger logger = utils::Logger(level);
+  auto logger = waterwheel::utils::Logger(level);
 
-  logger.log(utils::LogLevel::kInfo, "Waterwheel Monitoring Program");
+  logger.log(waterwheel::utils::LogLevel::kInfo,
+             "Waterwheel Monitoring Program");
   // TODO - Restructure CMakeLists.txt to allow inclusion of config.h in build
   // logger.log(utils::LogLevel::debug, "Revision %d.%d.%d",
   // PROJECT_VERSION_MAJOR, PROJECT_VERSION_MINOR, PROJECT_VERSION_PATCH);
@@ -23,18 +24,19 @@ int main(int argc, char *argv[]) {
 
   // TODO - Imput validation
   int port_number;
-  std::cout << "Enter the desired serial port number: ";
+  logger.log(waterwheel::utils::LogLevel::kInfo,
+             "Enter the desired serial port number: ");
   std::cin >> port_number;
-  logger.log(utils::LogLevel::kDebug, "Selected port: COM%d", port_number);
+  logger.log(waterwheel::utils::LogLevel::kDebug, "Selected port: COM%d",
+             port_number);
 
-  int delayAmount = utils::kDefaultDelay;
-
-  if (debugMode) {
-    utils::debugConfigureDelay(logger, &delayAmount);
-    // TODO - utils::debugSetFrequencyLimits();
+  // TODO - Find a better way of calling debug mode functions
+  int delay_amount = waterwheel::utils::kDefaultDelay;
+  if (debug_mode) {
+    waterwheel::utils::debugConfigureDelay(logger, &delay_amount);
   }
 
-  auto monitor = waterwheel::hardware::Modbus(port_number, logger);
+  auto monitor = waterwheel::hardware::Modbus(logger, port_number);
 
   // TODO - Can this big loop with print statements be cleaned up?
   while (true) {
@@ -45,7 +47,7 @@ int main(int argc, char *argv[]) {
     float average_frequency = monitor.getAverageFrequency(frequency);
     // TODO - The centering of the output prints is done using tabs here; is
     // there a better way?
-    logger.log(utils::LogLevel::kInfo,
+    logger.log(waterwheel::utils::LogLevel::kInfo,
                "Frequency (Hz):              %2.1f   Average Frequency (Hz):   "
                "  %2.1f",
                frequency, average_frequency);
@@ -89,7 +91,7 @@ int main(int argc, char *argv[]) {
     // TODO - Find a better way to do this
     monitor.incrementAverage();
 
-    waterwheel::utils::delay(delayAmount);
+    waterwheel::utils::delay(delay_amount);
   }
 
   return 0;

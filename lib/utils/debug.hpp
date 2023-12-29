@@ -9,7 +9,7 @@
  voltage, current etc) */
 
 namespace waterwheel::utils {
-constexpr static const char *DEBUG_FLAG = "-d";
+constexpr static const char *kDebugFlag = "-d";
 
 /**
  * @brief Allow user to set their own delay time between measurements

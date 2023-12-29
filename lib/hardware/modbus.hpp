@@ -1,21 +1,19 @@
 #pragma once
 
-#include <string.h>
-#include <windows.h>
-
 #include <array>
 #include <hardware/requests.hpp>
+#include <hardware/serial.hpp>
 #include <iostream>
 #include <sstream>
 #include <utils/logger.hpp>
 #include <utils/utils.hpp>
 
 namespace waterwheel::hardware {
-
 class Modbus {
  public:
-  Modbus(int port_number, utils::Logger &logger);
+  Modbus(utils::Logger &logger_, int port_number);
   ~Modbus();
+
   float getFrequency();
   float getActivePower();
   float getTotalActiveEnergy();
@@ -30,11 +28,13 @@ class Modbus {
    * determine the average frequency.
    */
   float getAverageFrequency(float frequency);
+
   /**
    * @brief Use a set number of previous readings (kSizeOfAverageArrays) to
    * determine the average active power.
    */
   float getAverageActivePower(float active_power);
+
   /**
    * @brief Check that the average frequency is within the upper and lower
    * limits defined by kFrequencyMax and kFrequencyMin. If outwith these limits,
@@ -60,13 +60,6 @@ class Modbus {
    */
   float getAverage(float value, std::array<float, 10> &array);
 
-  int writeData(const std::array<char, 8> &request);
-
-  bool readData(std::array<char, 9> &bytes_to_read);
-  /**
-   * @brief Create a HANDLE variable for accessing the serial port
-   */
-  HANDLE setupSerial(int port_number);
   /**
    * @brief Converts four char bytes to an equivalent 32-bit float. Implemnted
    * as the energy meter generates data in floating point format but program
@@ -82,7 +75,7 @@ class Modbus {
   std::array<float, kSizeOfAverageArrays> averaging_power_data_ = {};
   int average_count_ = 0;
 
-  HANDLE serial_;
+  Serial serial_;
   utils::Logger &logger_;
 };
 }  // namespace waterwheel::hardware

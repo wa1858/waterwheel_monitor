@@ -43,11 +43,11 @@ The output executable can be found and ran (on Windows) here:
 
     $ ./bin/waterwheel_monitor
 
+To run the program in debug mode, add the flag `-d` when running
+
 ## Code Style
 
 This project follows the [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html), and all code written for this project should follow these guidelines.
-
-To run the program in debug mode, add the flag `-d` when running
 
 ## References
 

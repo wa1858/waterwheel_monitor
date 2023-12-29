@@ -1,20 +1,20 @@
 #include "modbus.hpp"
 
 namespace waterwheel::hardware {
-Modbus::Modbus(int port_number, utils::Logger &logger) : logger_(logger) {
-  this->serial_ = this->setupSerial(port_number);
+Modbus::Modbus(utils::Logger &logger, int port_number)
+    : logger_(logger), serial_(logger, port_number) {
   this->logger_.log(utils::LogLevel::kDebug, "New Modbus created");
 }
 
 Modbus::~Modbus() {
-  CloseHandle(this->serial_);
-  this->logger_.log(utils::LogLevel::kDebug, "Serial connection closed");
+  this->serial_.~Serial();
+  this->logger_.log(utils::LogLevel::kDebug, "Modbus object destroyed");
 }
 
 float Modbus::getData(const std::array<char, 8> &request) {
-  writeData(request);
+  serial_.writeData(request);
   std::array<char, 9> data;
-  readData(data);
+  serial_.readData(data);
   return convertDataToFloat(data);
 }
 
@@ -33,79 +33,6 @@ void Modbus::incrementAverage() {
   if (average_count_ >= kSizeOfAverageArrays) {
     average_count_ = 0;
   }
-}
-
-int Modbus::writeData(const std::array<char, 8> &request) {
-  DWORD bytes_written = 0;
-  if (!WriteFile(this->serial_, request.data(), request.size(), &bytes_written,
-                 nullptr)) {
-    return 1;
-  }
-  return 0;
-}
-
-// TODO - What should this return if okay?
-bool Modbus::readData(std::array<char, 9> &bytes_to_read) {
-  DWORD bytes_read = 0;
-  bool status = ReadFile(this->serial_, bytes_to_read.data(),
-                         bytes_to_read.size(), &bytes_read, nullptr);
-  if (!status) {
-    logger_.log(utils::LogLevel::kWarning, "Could not read from serial port");
-  }
-  return status;
-}
-
-HANDLE Modbus::setupSerial(int port_number) {
-  // Declare variables and structures
-  DCB dcbSerialParams = {0};
-  COMMTIMEOUTS timeouts = {0};
-
-  // String concatenation
-  std::stringstream ss;
-  ss << "\\\\.\\COM" << port_number;
-  std::string port = ss.str();
-
-  // Open the desired serial port
-  logger_.log(utils::LogLevel::kInfo, "Opening serial port COM%d", port_number);
-
-  HANDLE hSerial =
-      CreateFile(port.c_str(), GENERIC_READ | GENERIC_WRITE, 0, nullptr,
-                 OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
-  if (hSerial == INVALID_HANDLE_VALUE) {
-    logger_.log(utils::LogLevel::kFatal, "Error");
-    exit(EXIT_FAILURE);
-  }
-  logger_.log(utils::LogLevel::kInfo, "Port opened successfully");
-  // Set device parameters (9600 baud, 1 start bit, 1 stop bit, no parity)
-  dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
-  if (GetCommState(hSerial, &dcbSerialParams) == 0) {
-    logger_.log(utils::LogLevel::kFatal, "Error getting device state");
-    CloseHandle(hSerial);
-    exit(EXIT_FAILURE);
-  }
-
-  dcbSerialParams.BaudRate = CBR_9600;
-  dcbSerialParams.ByteSize = 8;
-  dcbSerialParams.StopBits = ONESTOPBIT;
-  dcbSerialParams.Parity = NOPARITY;
-  if (SetCommState(hSerial, &dcbSerialParams) == 0) {
-    logger_.log(utils::LogLevel::kFatal, "Error setting device parameters");
-    CloseHandle(hSerial);
-    exit(EXIT_FAILURE);
-  }
-
-  // Set COM port timeout settings
-  timeouts.ReadIntervalTimeout = 50;
-  timeouts.ReadTotalTimeoutConstant = 50;
-  timeouts.ReadTotalTimeoutMultiplier = 10;
-  timeouts.WriteTotalTimeoutConstant = 50;
-  timeouts.WriteTotalTimeoutMultiplier = 10;
-  if (SetCommTimeouts(hSerial, &timeouts) == 0) {
-    logger_.log(utils::LogLevel::kFatal, "Error setting timeouts");
-    CloseHandle(hSerial);
-    exit(EXIT_FAILURE);
-  }
-  return hSerial;
 }
 
 float Modbus::convertDataToFloat(const std::array<char, 9> &bytes_to_read) {
