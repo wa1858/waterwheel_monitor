@@ -42,7 +42,7 @@ int Modbus::writeData(const std::array<char, 8> &request) {
     return 1;
   }
   return 0;
-};
+}
 
 // TODO - What should this return if okay?
 bool Modbus::readData(std::array<char, 9> &bytes_to_read) {

@@ -16,25 +16,32 @@ Stock No: 236-9298
 Underspeed threshold at 44.5Hz average and overspeed threshold at 48.5Hz average, with audio warning when either of these thresholds are crossed.
 
 ## Dependencies
-- Visual Studio 17 2022
-- MinGW
-- CMake >= 3.28
+- MinGW-W64
+- CMake >= 3.22
+
+These can be installed on Linux with the following commands:
+
+    $ sudo apt-get update -y
+    $ sudo apt-get upgrade -y
+    $ sudo apt-get install mingw-w64
+    $ sudo apt-get install cmake
+
 
 ## Compilation
 
-This project is written for use on Windows.
+This project is written for use on Windows, but is build using cross compilation on Linux.
 
 To build the project, run the following commands from the project root:
 
     $ mkdir build
     $ cd build
     $ cmake ..
-    $ cmake --build .
+    $ make
 
 
-To run (from within the `build` folder):
+The output executable can be found and ran (on Windows) here:
 
-    $ ./src/Debug/waterwheel_monitor
+    $ ./bin/waterwheel_monitor
 
 ## Code Style
 
