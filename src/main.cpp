@@ -1,63 +1,98 @@
-// Program to monitor performance of the waterwheel
-
+#include <cstring>
 #include <hardware/modbus.hpp>
 #include <hardware/serial.hpp>
+#include <utils/debug.hpp>
 #include <utils/logger.hpp>
 #include <utils/utils.hpp>
 // #include "config.h"
 
-using namespace waterwheel;
+int main(int argc, char *argv[]) {
+  // Determine if debug mode is enabled
+  bool debug_mode = argc > 1 && strcmp(argv[0], waterwheel::utils::kDebugFlag);
+  waterwheel::utils::LogLevel level = debug_mode
+                                          ? waterwheel::utils::LogLevel::kDebug
+                                          : waterwheel::utils::LogLevel::kInfo;
 
-int main()
-{
-    utils::Logger logger = utils::Logger(utils::LogLevel::debug);
-    logger.log(utils::LogLevel::info, "Waterwheel Monitoring Program");
-    // TODO - Restructure CMakeLists.txt to allow inclusion of config.h in build
-    // logger.log(utils::LogLevel::debug, "Revision %d.%d.%d", PROJECT_VERSION_MAJOR, PROJECT_VERSION_MINOR, PROJECT_VERSION_PATCH);
-    // logger.log(utils::LogLevel::debug, "Build Date: %s", BUILD_DATE);
+  auto logger = waterwheel::utils::Logger(level);
 
-    int portNumber = hardware::Serial::selectSerialPort(logger);
+  logger.log(waterwheel::utils::LogLevel::kInfo,
+             "Waterwheel Monitoring Program");
+  // TODO - Restructure CMakeLists.txt to allow inclusion of config.h in build
+  // logger.log(utils::LogLevel::debug, "Revision %d.%d.%d",
+  // PROJECT_VERSION_MAJOR, PROJECT_VERSION_MINOR, PROJECT_VERSION_PATCH);
+  // logger.log(utils::LogLevel::debug, "Build Date: %s", BUILD_DATE);
 
-    hardware::Modbus monitor = hardware::Modbus(logger, portNumber);
+  // TODO - Imput validation
+  int port_number;
+  logger.log(waterwheel::utils::LogLevel::kInfo,
+             "Enter the desired serial port number: ");
+  std::cin >> port_number;
+  logger.log(waterwheel::utils::LogLevel::kDebug, "Selected port: COM%d",
+             port_number);
 
-    while (true)
-    {
-        logger.log(utils::LogLevel::info, "");
-        float frequency = monitor.getFrequency();
-        float average_frequency = monitor.getAverageFrequency(frequency);
-        logger.log(utils::LogLevel::info, "Frequency (Hz): %2.1f%sAverage Frequency (Hz): %2.1f", frequency, utils::WHITESPACE, average_frequency);
-        monitor.checkAverageFrequency(average_frequency);
+  // TODO - Find a better way of calling debug mode functions
+  int delay_amount = waterwheel::utils::kDefaultDelay;
+  if (debug_mode) {
+    waterwheel::utils::debugConfigureDelay(logger, &delay_amount);
+  }
 
-        float active_power = monitor.getActivePower();
-        float average_active_power = monitor.getAverageActivePower(active_power);
-        logger.log(utils::LogLevel::info, "Active Power (W): %2.3f%sAverage Active Power (W): %2.3f", active_power, utils::WHITESPACE, average_active_power);
+  auto monitor = waterwheel::hardware::Modbus(logger, port_number);
 
-        float total_active_energy = monitor.getTotalActiveEnergy();
-        logger.log(utils::LogLevel::info, "Total Active Energy (kWh): %2.0f", total_active_energy);
+  // TODO - Can this big loop with print statements be cleaned up?
+  while (true) {
+    // Break between each record
+    std::cout << std::endl;
 
-        float voltage = monitor.getVoltage();
-        logger.log(utils::LogLevel::info, "Voltage (V): %2.1f", voltage);
+    float frequency = monitor.getFrequency();
+    float average_frequency = monitor.getAverageFrequency(frequency);
+    // TODO - The centering of the output prints is done using tabs here; is
+    // there a better way?
+    logger.log(waterwheel::utils::LogLevel::kInfo,
+               "Frequency (Hz):              %2.1f   Average Frequency (Hz):   "
+               "  %2.1f",
+               frequency, average_frequency);
+    monitor.checkAverageFrequency(average_frequency);
 
-        float current = monitor.getCurrent();
-        logger.log(utils::LogLevel::info, "Current (A): %2.3f", current);
+    float active_power = monitor.getActivePower();
+    float average_active_power = monitor.getAverageActivePower(active_power);
+    logger.log(waterwheel::utils::LogLevel::kInfo,
+               "Active Power (W): %2.3f%sAverage Active Power (W): %2.3f",
+               active_power, waterwheel::utils::kWhitespace,
+               average_active_power);
 
-        float reactive_power = monitor.getReactivePower();
-        logger.log(utils::LogLevel::info, "Reactive Power (VAr): %2.3f", reactive_power);
+    float total_active_energy = monitor.getTotalActiveEnergy();
+    logger.log(waterwheel::utils::LogLevel::kInfo,
+               "Total Active Energy (kWh):   %2.0f", total_active_energy);
 
-        float apparent_power = monitor.getApparentPower();
-        logger.log(utils::LogLevel::info, "Apparent Power (VA): %2.3f", apparent_power);
+    float voltage = monitor.getVoltage();
+    logger.log(waterwheel::utils::LogLevel::kInfo,
+               "Voltage (V):                 %2.1f", voltage);
 
-        float power_factor = monitor.getPowerFactor();
-        logger.log(utils::LogLevel::info, "Power Factor: %2.3f", power_factor);
+    float current = monitor.getCurrent();
+    logger.log(waterwheel::utils::LogLevel::kInfo,
+               "Current (A):                 %2.3f", current);
 
-        float phase_angle = monitor.getPhaseAngle();
-        logger.log(utils::LogLevel::info, "Phase Angle (degrees): %2.3f", phase_angle);
+    float reactive_power = monitor.getReactivePower();
+    logger.log(waterwheel::utils::LogLevel::kInfo,
+               "Reactive Power (VAr):        %2.3f", reactive_power);
 
-        // TODO - Find a better way to do this
-        monitor.incrementAverage();
+    float apparent_power = monitor.getApparentPower();
+    logger.log(waterwheel::utils::LogLevel::kInfo,
+               "Apparent Power (VA):         %2.3f", apparent_power);
 
-        utils::delay(1800);
-    }
+    float power_factor = monitor.getPowerFactor();
+    logger.log(waterwheel::utils::LogLevel::kInfo,
+               "Power Factor:                %2.3f", power_factor);
 
-    return 0;
+    float phase_angle = monitor.getPhaseAngle();
+    logger.log(waterwheel::utils::LogLevel::kInfo,
+               "Phase Angle (degrees):       %2.3f", phase_angle);
+
+    // TODO - Find a better way to do this
+    monitor.incrementAverage();
+
+    waterwheel::utils::delay(delay_amount);
+  }
+
+  return 0;
 }

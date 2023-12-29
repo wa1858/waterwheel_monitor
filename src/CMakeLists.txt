@@ -23,6 +23,5 @@ target_link_libraries(${target}
     library_network
     library_utils
 )
-
-# Set the output directory
-set_target_properties(${target} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
+file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
+set_target_properties(${target} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
