@@ -24,8 +24,7 @@ int main(int argc, char *argv[]) {
 
   // TODO - Imput validation
   int port_number;
-  logger.log(waterwheel::utils::LogLevel::kInfo,
-             "Enter the desired serial port number: ");
+  std::cout << "Enter the desired serial port number: ";
   std::cin >> port_number;
   logger.log(waterwheel::utils::LogLevel::kDebug, "Selected port: COM%d",
              port_number);

@@ -2,19 +2,10 @@
 
 namespace waterwheel::utils {
 Logger::Logger(LogLevel level) : level_(level) {
+  this->createLogFile();
   this->log(LogLevel::kDebug, "Logger created");
 }
 Logger::~Logger() { this->log(LogLevel::kDebug, "Logger destroyed"); }
-
-// TODO - Print to the millisecond
-std::string Logger::getTimeStamp() {
-  auto now = std::chrono::system_clock::now();
-  auto in_time_t = std::chrono::system_clock::to_time_t(now);
-
-  std::stringstream ss;
-  ss << std::put_time(std::localtime(&in_time_t), "%Y/%m/%d %X");
-  return ss.str();
-}
 
 void Logger::log(LogLevel logLevel, const char *message, ...) {
   if (this->level_ <= logLevel) {
@@ -45,4 +36,21 @@ void Logger::log(LogLevel logLevel, const char *message, ...) {
     va_end(args);
   }
 }
+
+// TODO - Print to the millisecond
+std::string Logger::getTimeStamp() {
+  auto now = std::chrono::system_clock::now();
+  auto in_time_t = std::chrono::system_clock::to_time_t(now);
+
+  std::stringstream ss;
+  ss << std::put_time(std::localtime(&in_time_t), "%Y/%m/%d %X");
+  return ss.str();
+}
+
+void Logger::createLogFile() {
+  this->log(LogLevel::kWarning, "Unable to create log file on disk");
+}
+
+void Logger::logToDisk() {}
+
 }  // namespace waterwheel::utils

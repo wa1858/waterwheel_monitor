@@ -30,7 +30,20 @@ class Logger {
   void log(LogLevel logLevel, const char *message, ...);
 
  private:
+  /**
+   * @brief Generate a timestamp to accompany every log output
+   */
   std::string getTimeStamp();
+
+  /**
+   * @brief Generate a log file for the current day on disk
+   */
+  void createLogFile();
+
+  /**
+   * @brief Save the log output passed in to a file on disk
+   */
+  void logToDisk();
 
   LogLevel level_;
   /**
