@@ -3,12 +3,14 @@
 #include <stdarg.h>
 
 #include <chrono>
+#include <filesystem>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include <string>
 
 namespace waterwheel::utils {
-constexpr static const char *kWhitespace = "        ";
 
 /**
  * kDebug: Additional info for debugging (object created, value set, etc)
@@ -45,17 +47,24 @@ class Logger {
    */
   void logToDisk();
 
+ private:
   LogLevel level_;
+  std::ofstream log_file_;
+
+  const std::string kLogFileDirectory = "logs";
+  const std::string kLogFilePrefix = "log_";
+  const std::string kLogFileType = ".txt";
+
   /**
    * Debug: Green text, black background
    * Info: Blue text, black background
    * Warning: Yellow text, black background
    * Fatal: Red text, black background
    */
-  constexpr static const char *kColourFormatDebug = "\x1b[32m";
-  constexpr static const char *kColourFormatInfo = "\x1b[34m";
-  constexpr static const char *kColourFormatWarning = "\x1b[33m";
-  constexpr static const char *kColourFormatFatal = "\x1b[31m";
-  constexpr static const char *kColourFormatReset = "\x1b[0m";
+  const std::string kColourFormatDebug = "\x1b[32m";
+  const std::string kColourFormatInfo = "\x1b[34m";
+  const std::string kColourFormatWarning = "\x1b[33m";
+  const std::string kColourFormatFatal = "\x1b[31m";
+  const std::string kColourFormatReset = "\x1b[0m";
 };
 }  // namespace waterwheel::utils

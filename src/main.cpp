@@ -44,8 +44,7 @@ int main(int argc, char *argv[]) {
 
     float frequency = monitor.getFrequency();
     float average_frequency = monitor.getAverageFrequency(frequency);
-    // TODO - The centering of the output prints is done using tabs here; is
-    // there a better way?
+    // TODO - Centering of prints is done with tabs here; is there a better way?
     logger.log(waterwheel::utils::LogLevel::kInfo,
                "Frequency (Hz):              %2.1f   Average Frequency (Hz):   "
                "  %2.1f",
@@ -54,10 +53,10 @@ int main(int argc, char *argv[]) {
 
     float active_power = monitor.getActivePower();
     float average_active_power = monitor.getAverageActivePower(active_power);
-    logger.log(waterwheel::utils::LogLevel::kInfo,
-               "Active Power (W): %2.3f%sAverage Active Power (W): %2.3f",
-               active_power, waterwheel::utils::kWhitespace,
-               average_active_power);
+    logger.log(
+        waterwheel::utils::LogLevel::kInfo,
+        "Active Power (W):            %2.3f Average Active Power (W): %2.3f",
+        active_power, average_active_power);
 
     float total_active_energy = monitor.getTotalActiveEnergy();
     logger.log(waterwheel::utils::LogLevel::kInfo,
