@@ -5,7 +5,7 @@ project(waterwheel_monitor
     DESCRIPTION "Program for monitoring performance of the waterwheel"
     LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 # Set generator
 set(CMAKE_GENERATOR "Visual Studio 17 2022")

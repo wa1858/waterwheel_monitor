@@ -32,9 +32,13 @@ To build the project, run the following commands from the project root:
     $ cmake --build .
 
 
-To run (from within the build folder):
+To run (from within the `build` folder):
 
     $ ./src/Debug/waterwheel_monitor
+
+## Code Style
+
+This project follows the [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html), and all code written for this project should follow these guidelines.
 
 ## References
 
