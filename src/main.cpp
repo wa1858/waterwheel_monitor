@@ -5,62 +5,74 @@
 #include <utils/utils.hpp>
 // #include "config.h"
 
-using namespace waterwheel;
+int main() {
+  auto logger = waterwheel::utils::Logger(waterwheel::utils::LogLevel::kDebug);
+  logger.log(waterwheel::utils::LogLevel::kInfo,
+             "Waterwheel Monitoring Program");
+  // TODO - Restructure CMakeLists.txt to allow inclusion of config.h in build
+  // logger.log(utils::LogLevel::kDebug, "Revision %d.%d.%d",
+  // PROJECT_VERSION_MAJOR, PROJECT_VERSION_MINOR, PROJECT_VERSION_PATCH);
+  // logger.log(utils::LogLevel::kDebug, "Build Date: %s", BUILD_DATE);
 
-int main()
-{
-    utils::Logger logger = utils::Logger(utils::LogLevel::debug);
-    logger.log(utils::LogLevel::info, "Waterwheel Monitoring Program");
-    // TODO - Restructure CMakeLists.txt to allow inclusion of config.h in build
-    // logger.log(utils::LogLevel::debug, "Revision %d.%d.%d", PROJECT_VERSION_MAJOR, PROJECT_VERSION_MINOR, PROJECT_VERSION_PATCH);
-    // logger.log(utils::LogLevel::debug, "Build Date: %s", BUILD_DATE);
+  // TODO - Imput validation
+  int port_number;
+  logger.log(waterwheel::utils::LogLevel::kInfo,
+             "Enter the desired serial port number: ");
+  std::cin >> port_number;
+  logger.log(waterwheel::utils::LogLevel::kDebug, "Selected port: COM%d",
+             port_number);
 
-    // TODO - Imput validation
-    int port_number;
-    logger.log(utils::LogLevel::info, "Enter the desired serial port number: ");
-    std::cin >> port_number;
-    logger.log(utils::LogLevel::debug, "Selected port: COM%d", port_number);
+  auto monitor = waterwheel::hardware::Modbus(port_number, logger);
 
-    hardware::Modbus monitor = hardware::Modbus(port_number, logger);
+  while (true) {
+    logger.log(waterwheel::utils::LogLevel::kInfo, "");
+    float frequency = monitor.getFrequency();
+    float average_frequency = monitor.getAverageFrequency(frequency);
+    logger.log(waterwheel::utils::LogLevel::kInfo,
+               "Frequency (Hz): %2.1f%sAverage Frequency (Hz): %2.1f",
+               frequency, waterwheel::utils::kWhitespace, average_frequency);
+    monitor.checkAverageFrequency(average_frequency);
 
-    while (true)
-    {
-        logger.log(utils::LogLevel::info, "");
-        float frequency = monitor.getFrequency();
-        float average_frequency = monitor.getAverageFrequency(frequency);
-        logger.log(utils::LogLevel::info, "Frequency (Hz): %2.1f%sAverage Frequency (Hz): %2.1f", frequency, utils::WHITESPACE, average_frequency);
-        monitor.checkAverageFrequency(average_frequency);
+    float active_power = monitor.getActivePower();
+    float average_active_power = monitor.getAverageActivePower(active_power);
+    logger.log(waterwheel::utils::LogLevel::kInfo,
+               "Active Power (W): %2.3f%sAverage Active Power (W): %2.3f",
+               active_power, waterwheel::utils::kWhitespace,
+               average_active_power);
 
-        float active_power = monitor.getActivePower();
-        float average_active_power = monitor.getAverageActivePower(active_power);
-        logger.log(utils::LogLevel::info, "Active Power (W): %2.3f%sAverage Active Power (W): %2.3f", active_power, utils::WHITESPACE, average_active_power);
+    float total_active_energy = monitor.getTotalActiveEnergy();
+    logger.log(waterwheel::utils::LogLevel::kInfo,
+               "Total Active Energy (kWh): %2.0f", total_active_energy);
 
-        float total_active_energy = monitor.getTotalActiveEnergy();
-        logger.log(utils::LogLevel::info, "Total Active Energy (kWh): %2.0f", total_active_energy);
+    float voltage = monitor.getVoltage();
+    logger.log(waterwheel::utils::LogLevel::kInfo, "Voltage (V): %2.1f",
+               voltage);
 
-        float voltage = monitor.getVoltage();
-        logger.log(utils::LogLevel::info, "Voltage (V): %2.1f", voltage);
+    float current = monitor.getCurrent();
+    logger.log(waterwheel::utils::LogLevel::kInfo, "Current (A): %2.3f",
+               current);
 
-        float current = monitor.getCurrent();
-        logger.log(utils::LogLevel::info, "Current (A): %2.3f", current);
+    float reactive_power = monitor.getReactivePower();
+    logger.log(waterwheel::utils::LogLevel::kInfo,
+               "Reactive Power (VAr): %2.3f", reactive_power);
 
-        float reactive_power = monitor.getReactivePower();
-        logger.log(utils::LogLevel::info, "Reactive Power (VAr): %2.3f", reactive_power);
+    float apparent_power = monitor.getApparentPower();
+    logger.log(waterwheel::utils::LogLevel::kInfo, "Apparent Power (VA): %2.3f",
+               apparent_power);
 
-        float apparent_power = monitor.getApparentPower();
-        logger.log(utils::LogLevel::info, "Apparent Power (VA): %2.3f", apparent_power);
+    float power_factor = monitor.getPowerFactor();
+    logger.log(waterwheel::utils::LogLevel::kInfo, "Power Factor: %2.3f",
+               power_factor);
 
-        float power_factor = monitor.getPowerFactor();
-        logger.log(utils::LogLevel::info, "Power Factor: %2.3f", power_factor);
+    float phase_angle = monitor.getPhaseAngle();
+    logger.log(waterwheel::utils::LogLevel::kInfo,
+               "Phase Angle (degrees): %2.3f", phase_angle);
 
-        float phase_angle = monitor.getPhaseAngle();
-        logger.log(utils::LogLevel::info, "Phase Angle (degrees): %2.3f", phase_angle);
+    // TODO - Find a better way to do this
+    monitor.incrementAverage();
 
-        // TODO - Find a better way to do this
-        monitor.incrementAverage();
+    waterwheel::utils::delay(1800);
+  }
 
-        utils::delay(1800);
-    }
-
-    return 0;
+  return 0;
 }
