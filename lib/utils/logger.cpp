@@ -7,43 +7,63 @@ Logger::Logger(LogLevel level) : level_(level) {
 }
 Logger::~Logger() {
   this->log(LogLevel::kDebug, "Logger destroyed");
-  this->log_file_.close();
+  fclose(this->log_file_);
 }
 
+// TODO - Refactor required
 void Logger::log(LogLevel logLevel, const char *message, ...) {
   if (this->level_ <= logLevel) {
-    std::cout << "[" << getTimeStamp() << "] ";
+    std::stringstream ss_terminal;
+    std::stringstream ss_log_file;
+    std::string time = getTimeStamp();
+    ss_terminal << "[" << time << "] ";
+    ss_log_file << "[" << time << "] ";
+
     FILE *file = stdout;
     switch (logLevel) {
       case LogLevel::kDebug:
-        printf("%s[DEBUG]   %s ", kColourFormatDebug.c_str(),
-               kColourFormatReset.c_str());
+        ss_terminal << kColourFormatDebug << "[DEBUG]   " << kColourFormatReset
+                    << " ";
+        ss_log_file << "[DEBUG]    ";
         break;
       case LogLevel::kInfo:
-        printf("%s[INFO]    %s ", kColourFormatInfo.c_str(),
-               kColourFormatReset.c_str());
+        ss_terminal << kColourFormatInfo << "[INFO]    " << kColourFormatReset
+                    << " ";
+        ss_log_file << "[INFO]     ";
         break;
       case LogLevel::kWarning:
-        printf("%s[WARNING] %s ", kColourFormatWarning.c_str(),
-               kColourFormatReset.c_str());
+        ss_terminal << kColourFormatWarning << "[WARNING] "
+                    << kColourFormatReset << " ";
+        ss_log_file << "[WARNING]  ";
         break;
       case LogLevel::kFatal:
-        printf("%s[ERROR]   %s ", kColourFormatFatal.c_str(),
-               kColourFormatReset.c_str());
+        ss_terminal << kColourFormatFatal << "[ERROR]   " << kColourFormatReset
+                    << " ";
+        ss_log_file << "[ERROR]    ";
         break;
       case LogLevel::kNone:
       default:
         break;
     }
 
+    ss_terminal << message;
+    ss_log_file << message;
+    std::string output_terminal = ss_terminal.str();
+    std::string output_log_file = ss_log_file.str();
+
     va_list args;
     va_start(args, message);
-    vfprintf(file, message, args);
+    vfprintf(file, output_terminal.c_str(), args);
     fprintf(file, "\n");
     va_end(args);
 
-    if (log_file_.is_open()) {
-      logToDisk();
+    // TODO - Why do some values print as -0.0, instead of 0.0
+    if (log_file_ != nullptr) {
+      va_list args;
+      va_start(args, message);
+      vfprintf(log_file_, output_log_file.c_str(), args);
+      fprintf(log_file_, "\n");
+      va_end(args);
     }
   }
 }
@@ -76,19 +96,13 @@ void Logger::createLogFile() {
   std::string log_file_path =
       kLogFileDirectory + "/" + kLogFilePrefix + date + kLogFileType;
   // TODO - Open a file without overwriting it if it already exists
-  log_file_.open(log_file_path);
-  if (!log_file_.is_open()) {
+  // log_file_.open(log_file_path);
+  log_file_ = fopen(log_file_path.c_str(), "w");
+  if (log_file_ == nullptr) {
     this->log(LogLevel::kWarning, "Unable to create log file on disk");
     return;
   }
   this->log(LogLevel::kDebug, "Log File Opened: %s", log_file_path.c_str());
-}
-
-// TODO - Implement fully
-void Logger::logToDisk() {
-  log_file_ << "[" << getTimeStamp() << "] "
-            << "LEVEL"
-            << " DEMO PRINT" << std::endl;
 }
 
 }  // namespace waterwheel::utils

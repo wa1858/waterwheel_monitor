@@ -42,14 +42,9 @@ class Logger {
    */
   void createLogFile();
 
-  /**
-   * @brief Save the log output passed in to a file on disk
-   */
-  void logToDisk();
-
  private:
   LogLevel level_;
-  std::ofstream log_file_;
+  FILE *log_file_ = nullptr;
 
   const std::string kLogFileDirectory = "logs";
   const std::string kLogFilePrefix = "log_";

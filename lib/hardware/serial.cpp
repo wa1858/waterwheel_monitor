@@ -82,7 +82,7 @@ void Serial::writeData(const std::array<char, 8> &request) {
                           &bytes_written, nullptr);
   if (!status) {
     logger_.log(utils::LogLevel::kWarning,
-                "Could not send request to serial_ port");
+                "Could not send request to serial port");
   }
 }
 
@@ -91,7 +91,7 @@ void Serial::readData(std::array<char, 9> &result) {
   bool status =
       ReadFile(serial_, result.data(), result.size(), &bytesRead, nullptr);
   if (!status) {
-    logger_.log(utils::LogLevel::kWarning, "Could not read from serial_ port");
+    logger_.log(utils::LogLevel::kWarning, "Could not read from serial port");
   }
 }
 }  // namespace waterwheel::hardware
