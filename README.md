@@ -47,6 +47,8 @@ The output executable can be found and ran (on Windows) here:
 
 This project follows the [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html), and all code written for this project should follow these guidelines.
 
+To run the program in debug mode, add the flag `-d` when running
+
 ## References
 
 - https://batchloaf.wordpress.com/2013/02/13/writing-bytes-to-a-serial-port-in-c/   writing data
