@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 
 project(waterwheel_monitor
-    VERSION 1.0.96
+    VERSION 1.0.97
     DESCRIPTION "Program for monitoring performance of the waterwheel"
     LANGUAGES CXX)
 

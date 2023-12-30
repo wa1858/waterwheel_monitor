@@ -1,5 +1,5 @@
 #include <cstring>
-#include <hardware/modbus.hpp>
+#include <hardware/energy_meter.hpp>
 #include <hardware/serial.hpp>
 #include <utils/debug.hpp>
 #include <utils/logger.hpp>
@@ -38,64 +38,71 @@ int main(int argc, char *argv[]) {
     // TODO - debugSetModbusAddress();
   }
 
-  auto monitor =
-      waterwheel::hardware::Modbus(logger, port_number, device_address);
+  auto energy_meter =
+      waterwheel::hardware::EnergyMeter(logger, port_number, device_address);
 
   // TODO - Can this big loop with print statements be cleaned up?
   while (true) {
     // Break between each record
     std::cout << std::endl;
 
-    float frequency = monitor.readValue(waterwheel::hardware::kFrequency);
-    float average_frequency = monitor.getAverageFrequency(frequency);
+    float frequency =
+        energy_meter.requestData(waterwheel::hardware::kRequestFrequency);
+    float average_frequency = energy_meter.getAverageFrequency(frequency);
     // TODO - The centering of the output prints is done using tabs here; is
     // there a better way?
     logger.log(waterwheel::utils::LogLevel::kInfo,
                "Frequency (Hz):              %2.1f   Average Frequency (Hz):   "
                "  %2.1f",
                frequency, average_frequency);
-    monitor.checkAverageFrequency(average_frequency);
+    energy_meter.checkAverageFrequency(average_frequency);
 
-    float active_power = monitor.readValue(waterwheel::hardware::kActivePower);
-    float average_active_power = monitor.getAverageActivePower(active_power);
+    float active_power =
+        energy_meter.requestData(waterwheel::hardware::kRequestActivePower);
+    float average_active_power =
+        energy_meter.getAverageActivePower(active_power);
     logger.log(waterwheel::utils::LogLevel::kInfo,
                "Active Power (W): %2.3f%sAverage Active Power (W): %2.3f",
                active_power, waterwheel::utils::kWhitespace,
                average_active_power);
 
-    float total_active_energy =
-        monitor.readValue(waterwheel::hardware::kTotalActiveEnergy);
+    float total_active_energy = energy_meter.requestData(
+        waterwheel::hardware::kRequestTotalActiveEnergy);
     logger.log(waterwheel::utils::LogLevel::kInfo,
                "Total Active Energy (kWh):   %2.0f", total_active_energy);
 
-    float voltage = monitor.readValue(waterwheel::hardware::kVoltage);
+    float voltage =
+        energy_meter.requestData(waterwheel::hardware::kRequestVoltage);
     logger.log(waterwheel::utils::LogLevel::kInfo,
                "Voltage (V):                 %2.1f", voltage);
 
-    float current = monitor.readValue(waterwheel::hardware::kCurrent);
+    float current =
+        energy_meter.requestData(waterwheel::hardware::kRequestCurrent);
     logger.log(waterwheel::utils::LogLevel::kInfo,
                "Current (A):                 %2.3f", current);
 
     float reactive_power =
-        monitor.readValue(waterwheel::hardware::kReactivePower);
+        energy_meter.requestData(waterwheel::hardware::kRequestReactivePower);
     logger.log(waterwheel::utils::LogLevel::kInfo,
                "Reactive Power (VAr):        %2.3f", reactive_power);
 
     float apparent_power =
-        monitor.readValue(waterwheel::hardware::kApparentPower);
+        energy_meter.requestData(waterwheel::hardware::kRequestApparentPower);
     logger.log(waterwheel::utils::LogLevel::kInfo,
                "Apparent Power (VA):         %2.3f", apparent_power);
 
-    float power_factor = monitor.readValue(waterwheel::hardware::kPowerFactor);
+    float power_factor =
+        energy_meter.requestData(waterwheel::hardware::kRequestPowerFactor);
     logger.log(waterwheel::utils::LogLevel::kInfo,
                "Power Factor:                %2.3f", power_factor);
 
-    float phase_angle = monitor.readValue(waterwheel::hardware::kPhaseAngle);
+    float phase_angle =
+        energy_meter.requestData(waterwheel::hardware::kRequestPhaseAngle);
     logger.log(waterwheel::utils::LogLevel::kInfo,
                "Phase Angle (degrees):       %2.3f", phase_angle);
 
     // TODO - Find a better way to do this
-    monitor.incrementAverage();
+    energy_meter.incrementAverage();
 
     waterwheel::utils::delay(delay_amount);
   }

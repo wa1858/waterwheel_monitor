@@ -11,69 +11,29 @@
 
 namespace waterwheel::hardware {
 
-// TODO - Restructure for use with many different Modbus peripherals?
+// TODO - Check that no two devices have the same address on construction
 // Device address can be in range 1-247 inclusive
 constexpr static uint8_t kDefaultDeviceAddress = 0x01;
 
-// Start Address Hi and Lo for each Modbus request, as defined in datasheet
-constexpr static std::pair<uint8_t, uint8_t> kFrequency(0x00, 0x46);
-constexpr static std::pair<uint8_t, uint8_t> kActivePower(0x00, 0x0C);
-constexpr static std::pair<uint8_t, uint8_t> kTotalActiveEnergy(0x01, 0x56);
-constexpr static std::pair<uint8_t, uint8_t> kVoltage(0x00, 0x00);
-constexpr static std::pair<uint8_t, uint8_t> kCurrent(0x00, 0x06);
-constexpr static std::pair<uint8_t, uint8_t> kReactivePower(0x00, 0x18);
-constexpr static std::pair<uint8_t, uint8_t> kApparentPower(0x00, 0x12);
-constexpr static std::pair<uint8_t, uint8_t> kPowerFactor(0x00, 0x1E);
-constexpr static std::pair<uint8_t, uint8_t> kPhaseAngle(0x00, 0x24);
-
 class Modbus {
- public:
-  Modbus(utils::Logger &logger, int port_number,
-         int device_address = kDefaultDeviceAddress);
+ protected:
+  Modbus(utils::Logger &logger, uint8_t port_number,
+         uint8_t device_address = kDefaultDeviceAddress);
   ~Modbus();
 
   /**
-   * @brief Construct and send a read request frame to the meter via Modbus,
-   * retrieve the response, and convert the result into a float.
+   * @brief Send a Modbus request frame and process the result
    */
-  float readValue(std::pair<uint8_t, uint8_t> request_pair);
+  float sendRequest(std::array<uint8_t, 8> request_frame);
 
-  /**
-   * @brief Use a set number of previous readings (kSizeOfAverageArrays) to
-   * determine the average frequency.
-   */
-  float getAverageFrequency(float frequency);
-
-  /**
-   * @brief Use a set number of previous readings (kSizeOfAverageArrays) to
-   * determine the average active power.
-   */
-  float getAverageActivePower(float active_power);
-
-  /**
-   * @brief Check that the average frequency is within the upper and lower
-   * limits defined by kFrequencyMax and kFrequencyMin. If outwith these limits,
-   * warn the user.
-   */
-  void checkAverageFrequency(float average_frequency);
-
-  /**
-   * @brief Increment the Class-defined array index for average value arrays
-   */
-  void incrementAverage();
+  uint8_t getDeviceAddress();
 
  private:
   /**
-   * @brief Compute the required checksum bits for a given MODBUS data frame
+   * @brief Compute the required checksum bits for a given Modbus data frame
    * (CRC-16)
    */
   void computeRequestChecksum(std::array<uint8_t, 8> &request_frame);
-
-  /**
-   * @brief Determine the average value of the elements of an array. Used for
-   * calculating average frequency and active power
-   */
-  float getAverage(float value, std::array<float, 10> &array);
 
   /**
    * @brief Converts four bytes from the Modbus repsonse into an equivalent
@@ -83,18 +43,6 @@ class Modbus {
   float convertDataToFloat(const std::array<uint8_t, 9> &data_frame);
 
  private:
-  // Additional Modbus frame constants from datasheet
-  constexpr static uint8_t kModbusRead = 0x04;
-  constexpr static uint8_t kModbusPointsHi = 0x00;
-  constexpr static uint8_t kModbusPointsLo = 0x02;
-
-  constexpr static int kSizeOfAverageArrays = 10;
-  constexpr static float kFrequencyMin = 44.5;
-  constexpr static float kFrequencyMax = 48.5;
-  std::array<float, kSizeOfAverageArrays> averaging_frequency_data_ = {};
-  std::array<float, kSizeOfAverageArrays> averaging_power_data_ = {};
-  int average_count_ = 0;
-
   /**
    * Request Format:
    * - Address of device
@@ -105,11 +53,8 @@ class Modbus {
    * - Number of registers low
    * - Error check low
    * - Error check high
-   * Dynamic values initialised as 0x00
    */
-  std::array<uint8_t, 8> request_frame_ = {
-      0x00, kModbusRead, 0x00, 0x00, kModbusPointsHi, kModbusPointsLo,
-      0x00, 0x00};
+  std::array<uint8_t, 8> request_frame_ = {};
 
   Serial serial_;
   utils::Logger &logger_;
