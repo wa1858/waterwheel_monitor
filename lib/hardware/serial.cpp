@@ -15,7 +15,7 @@ int Serial::selectSerialPort(utils::Logger &logger_) {
   // TODO - Use getSerialPorts() here present list of ports to user
   // TODO - Imput validation
   int portNumber;
-  std::cout << "Enter the desired serial_ port number: ";
+  std::cout << "Enter the desired serial port number: ";
   std::cin >> portNumber;
   logger_.log(utils::LogLevel::kDebug, "Selected port: COM%d", portNumber);
   return portNumber;
@@ -34,7 +34,7 @@ HANDLE Serial::setUpSerial(int portNumber) {
   std::string port = ss.str();
 
   // Open the desired serial_ port
-  logger_.log(utils::LogLevel::kInfo, "Opening serial_ port COM%d", portNumber);
+  logger_.log(utils::LogLevel::kInfo, "Opening serial port COM%d", portNumber);
 
   HANDLE hSerial =
       CreateFile(port.c_str(), GENERIC_READ | GENERIC_WRITE, 0, nullptr,
@@ -76,22 +76,22 @@ HANDLE Serial::setUpSerial(int portNumber) {
   return hSerial;
 }
 
-void Serial::writeData(const std::array<char, 8> &request) {
+void Serial::writeData(const std::array<uint8_t, 8> &request) {
   DWORD bytes_written = 0;
   bool status = WriteFile(serial_, request.data(), request.size(),
                           &bytes_written, nullptr);
   if (!status) {
     logger_.log(utils::LogLevel::kWarning,
-                "Could not send request to serial_ port");
+                "Could not send request to serial port");
   }
 }
 
-void Serial::readData(std::array<char, 9> &result) {
+void Serial::readData(std::array<uint8_t, 9> &response) {
   DWORD bytesRead = 0;
   bool status =
-      ReadFile(serial_, result.data(), result.size(), &bytesRead, nullptr);
+      ReadFile(serial_, response.data(), response.size(), &bytesRead, nullptr);
   if (!status) {
-    logger_.log(utils::LogLevel::kWarning, "Could not read from serial_ port");
+    logger_.log(utils::LogLevel::kWarning, "Could not read from serial port");
   }
 }
 }  // namespace waterwheel::hardware

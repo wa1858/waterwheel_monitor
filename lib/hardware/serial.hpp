@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdint.h>
 #include <windows.h>
 
 #include <array>
@@ -20,12 +21,12 @@ class Serial {
   /**
    * @brief Send a data request through the serial port
    */
-  void writeData(const std::array<char, 8> &request);
+  void writeData(const std::array<uint8_t, 8> &request);
 
   /**
    * @brief Retrieve data from the serial port and store the result
    */
-  void readData(std::array<char, 9> &result);
+  void readData(std::array<uint8_t, 9> &response);
 
  private:
   /**

@@ -5,38 +5,61 @@ Modbus::Modbus(utils::Logger &logger, int port_number, int device_address)
     : logger_(logger),
       serial_(logger, port_number),
       device_address_(device_address) {
-  this->logger_.log(utils::LogLevel::kDebug, "New Modbus created: Address %d",
+  this->logger_.log(utils::LogLevel::kDebug, "New Modbus(%d) created",
                     device_address_);
 }
 
 Modbus::~Modbus() {
   this->serial_.~Serial();
-  this->logger_.log(utils::LogLevel::kDebug, "Modbus object destroyed");
+  this->logger_.log(utils::LogLevel::kDebug, "Modbus(%d) object destroyed",
+                    device_address_);
 }
 
-// TODO - Different print statements depending on request made?
-// TODO - Check if average needs computing (frequency, active power)
-float Modbus::readValue(std::pair<char, char> request_pair) {
+float Modbus::readValue(std::pair<uint8_t, uint8_t> request_pair) {
+  request_frame_[0] = device_address_;
   request_frame_[2] = request_pair.first;
   request_frame_[3] = request_pair.second;
+
   computeRequestChecksum(request_frame_);
+  logger_.log(
+      utils::LogLevel::kDebug,
+      "Frame constructed: {0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x}",
+      request_frame_[0], request_frame_[1], request_frame_[2],
+      request_frame_[3], request_frame_[4], request_frame_[5],
+      request_frame_[6], request_frame_[7]);
+
   float result = getData(request_frame_);
-  logger_.log(utils::LogLevel::kInfo, "Request result: %2.3f", result);
   return result;
 }
 
-// TODO - Hardcoded for frequency. Implement fully
-void Modbus::computeRequestChecksum(std::array<char, 8> &request_frame) {
-  request_frame[6] = static_cast<char>(0x90);
-  request_frame[7] = static_cast<char>(0x1E);
-  logger_.log(utils::LogLevel::kDebug, "Checksum computed");
+// Implemented based on MODBUS documentation for meter
+void Modbus::computeRequestChecksum(std::array<uint8_t, 8> &request_frame) {
+  // Preload 16-bit register with all 1s
+  uint16_t reg = 0xFFFF;
+  // For every byte (apart from the two error checking bytes being computed)
+  for (int i = 0; i < request_frame.size() - 2; ++i) {
+    // XOR reg with byte
+    reg ^= request_frame[i];
+    // For every bit in the byte
+    for (int j = 0; j < 8; ++j) {
+      if (reg & 0x001) {
+        // 0xA001 value from MODBUS documentation
+        reg = (reg >> 1) ^ 0xA001;
+      } else {
+        reg = reg >> 1;
+      }
+    }
+  }
+  // Split result into two checksum bytes
+  request_frame[6] = (reg & 0xFF);
+  request_frame[7] = ((reg >> 8) & 0xFF);
 }
 
-float Modbus::getData(const std::array<char, 8> &request) {
+float Modbus::getData(const std::array<uint8_t, 8> &request) {
   serial_.writeData(request);
-  std::array<char, 9> data;
-  serial_.readData(data);
-  return convertDataToFloat(data);
+  std::array<uint8_t, 9> response;
+  serial_.readData(response);
+  return convertDataToFloat(response);
 }
 
 float Modbus::getAverage(float value,
@@ -56,27 +79,17 @@ void Modbus::incrementAverage() {
   }
 }
 
-float Modbus::convertDataToFloat(const std::array<char, 9> &bytes_to_read) {
-  // Note static_cast forces compiler to treat array members as int, not char
-  int bytes[4];
-  bytes[0] = static_cast<int>(bytes_to_read[3]);
-  bytes[1] = static_cast<int>(bytes_to_read[4]);
-  bytes[2] = static_cast<int>(bytes_to_read[5]);
-  bytes[3] = static_cast<int>(bytes_to_read[6]);
-
-  // Convert the four integers into a single integer representing a 32-bit
-  // number
-  uint32_t int_data =
-      (bytes[0] << 24) + (bytes[1] << 16) + (bytes[2] << 8) + bytes[3];
+float Modbus::convertDataToFloat(const std::array<uint8_t, 9> &data_frame) {
+  // Convert four data bytes into a single 32-bit number
+  uint32_t data = (data_frame[3] << 24) + (data_frame[4] << 16) +
+                  (data_frame[5] << 8) + data_frame[6];
 
   // Assign result to memory assigned for float, resulting in float cast
   float f;
-  memcpy(&f, &int_data, sizeof(float));
+  memcpy(&f, &data, sizeof(f));
 
   return f;
 }
-
-float Modbus::getFrequency() { return getData(kRequestFrequency); }
 
 float Modbus::getAverageFrequency(float frequency) {
   return getAverage(frequency, averaging_frequency_data_);
@@ -97,25 +110,7 @@ void Modbus::checkAverageFrequency(float average_frequency) {
   }
 }
 
-float Modbus::getActivePower() { return getData(kRequestActivePower); }
-
 float Modbus::getAverageActivePower(float active_power) {
   return getAverage(active_power, averaging_power_data_);
 }
-
-float Modbus::getTotalActiveEnergy() {
-  return getData(kRequestTotalActiveEnergy);
-}
-
-float Modbus::getVoltage() { return getData(kRequestVoltage); }
-
-float Modbus::getCurrent() { return getData(kRequestCurrent); }
-
-float Modbus::getReactivePower() { return getData(kRequestReactivePower); }
-
-float Modbus::getApparentPower() { return getData(kRequestApparentPower); }
-
-float Modbus::getPowerFactor() { return getData(kRequestPowerFactor); }
-
-float Modbus::getPhaseAngle() { return getData(kRequestPhaseAngle); }
 }  // namespace waterwheel::hardware

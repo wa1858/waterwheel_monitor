@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
     // Break between each record
     std::cout << std::endl;
 
-    float frequency = monitor.getFrequency();
+    float frequency = monitor.readValue(waterwheel::hardware::kFrequency);
     float average_frequency = monitor.getAverageFrequency(frequency);
     // TODO - The centering of the output prints is done using tabs here; is
     // there a better way?
@@ -56,38 +56,41 @@ int main(int argc, char *argv[]) {
                frequency, average_frequency);
     monitor.checkAverageFrequency(average_frequency);
 
-    float active_power = monitor.getActivePower();
+    float active_power = monitor.readValue(waterwheel::hardware::kActivePower);
     float average_active_power = monitor.getAverageActivePower(active_power);
     logger.log(waterwheel::utils::LogLevel::kInfo,
                "Active Power (W): %2.3f%sAverage Active Power (W): %2.3f",
                active_power, waterwheel::utils::kWhitespace,
                average_active_power);
 
-    float total_active_energy = monitor.getTotalActiveEnergy();
+    float total_active_energy =
+        monitor.readValue(waterwheel::hardware::kTotalActiveEnergy);
     logger.log(waterwheel::utils::LogLevel::kInfo,
                "Total Active Energy (kWh):   %2.0f", total_active_energy);
 
-    float voltage = monitor.getVoltage();
+    float voltage = monitor.readValue(waterwheel::hardware::kVoltage);
     logger.log(waterwheel::utils::LogLevel::kInfo,
                "Voltage (V):                 %2.1f", voltage);
 
-    float current = monitor.getCurrent();
+    float current = monitor.readValue(waterwheel::hardware::kCurrent);
     logger.log(waterwheel::utils::LogLevel::kInfo,
                "Current (A):                 %2.3f", current);
 
-    float reactive_power = monitor.getReactivePower();
+    float reactive_power =
+        monitor.readValue(waterwheel::hardware::kReactivePower);
     logger.log(waterwheel::utils::LogLevel::kInfo,
                "Reactive Power (VAr):        %2.3f", reactive_power);
 
-    float apparent_power = monitor.getApparentPower();
+    float apparent_power =
+        monitor.readValue(waterwheel::hardware::kApparentPower);
     logger.log(waterwheel::utils::LogLevel::kInfo,
                "Apparent Power (VA):         %2.3f", apparent_power);
 
-    float power_factor = monitor.getPowerFactor();
+    float power_factor = monitor.readValue(waterwheel::hardware::kPowerFactor);
     logger.log(waterwheel::utils::LogLevel::kInfo,
                "Power Factor:                %2.3f", power_factor);
 
-    float phase_angle = monitor.getPhaseAngle();
+    float phase_angle = monitor.readValue(waterwheel::hardware::kPhaseAngle);
     logger.log(waterwheel::utils::LogLevel::kInfo,
                "Phase Angle (degrees):       %2.3f", phase_angle);
 
