@@ -32,11 +32,14 @@ int main(int argc, char *argv[]) {
 
   // TODO - Find a better way of calling debug mode functions
   int delay_amount = waterwheel::utils::kDefaultDelay;
+  int device_address = waterwheel::hardware::kDefaultDeviceAddress;
   if (debug_mode) {
     waterwheel::utils::debugConfigureDelay(logger, &delay_amount);
+    // TODO - debugSetModbusAddress();
   }
 
-  auto monitor = waterwheel::hardware::Modbus(logger, port_number);
+  auto monitor =
+      waterwheel::hardware::Modbus(logger, port_number, device_address);
 
   // TODO - Can this big loop with print statements be cleaned up?
   while (true) {

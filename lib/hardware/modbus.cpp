@@ -1,14 +1,35 @@
 #include "modbus.hpp"
 
 namespace waterwheel::hardware {
-Modbus::Modbus(utils::Logger &logger, int port_number)
-    : logger_(logger), serial_(logger, port_number) {
-  this->logger_.log(utils::LogLevel::kDebug, "New Modbus created");
+Modbus::Modbus(utils::Logger &logger, int port_number, int device_address)
+    : logger_(logger),
+      serial_(logger, port_number),
+      device_address_(device_address) {
+  this->logger_.log(utils::LogLevel::kDebug, "New Modbus created: Address %d",
+                    device_address_);
 }
 
 Modbus::~Modbus() {
   this->serial_.~Serial();
   this->logger_.log(utils::LogLevel::kDebug, "Modbus object destroyed");
+}
+
+// TODO - Different print statements depending on request made?
+// TODO - Check if average needs computing (frequency, active power)
+float Modbus::readValue(std::pair<char, char> request_pair) {
+  request_frame_[2] = request_pair.first;
+  request_frame_[3] = request_pair.second;
+  computeRequestChecksum(request_frame_);
+  float result = getData(request_frame_);
+  logger_.log(utils::LogLevel::kInfo, "Request result: %2.3f", result);
+  return result;
+}
+
+// TODO - Hardcoded for frequency. Implement fully
+void Modbus::computeRequestChecksum(std::array<char, 8> &request_frame) {
+  request_frame[6] = static_cast<char>(0x90);
+  request_frame[7] = static_cast<char>(0x1E);
+  logger_.log(utils::LogLevel::kDebug, "Checksum computed");
 }
 
 float Modbus::getData(const std::array<char, 8> &request) {

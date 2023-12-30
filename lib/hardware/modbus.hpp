@@ -9,10 +9,42 @@
 #include <utils/utils.hpp>
 
 namespace waterwheel::hardware {
+
+// Device address can be in range 1-247 inclusive
+constexpr static int kDefaultDeviceAddress = 0x01;
+constexpr static std::pair<char, char> kFrequency(0x00, 0x46);
+constexpr static std::pair<char, char> kActivePower(0x00, 0x0C);
+constexpr static std::pair<char, char> kTotalActiveEnergy(0x01, 0x56);
+constexpr static std::pair<char, char> kVoltage(0x00, 0x00);
+constexpr static std::pair<char, char> kCurrent(0x00, 0x06);
+constexpr static std::pair<char, char> kReactivePower(0x00, 0x18);
+constexpr static std::pair<char, char> kApparentPower(0x00, 0x12);
+constexpr static std::pair<char, char> kPowerFactor(0x00, 0x1E);
+constexpr static std::pair<char, char> kPhaseAngle(0x00, 0x24);
+
+constexpr static char kModbusRead = 0x04;
+constexpr static char kModbusPointsHi = 0x00;
+constexpr static char kModbusPointsLo = 0x02;
+
+// enum class MeterReadings {
+//   kFrequency = 0,
+//   kActivePower,
+//   kTotalActiveEnergy,
+//   kVoltage,
+//   kCurrent,
+//   kReactivePower,
+//   kApparentPower,
+//   kPowerFactor,
+//   kPhaseAngle
+// };
+
 class Modbus {
  public:
-  Modbus(utils::Logger &logger_, int port_number);
+  Modbus(utils::Logger &logger, int port_number,
+         int device_address = kDefaultDeviceAddress);
   ~Modbus();
+
+  float readValue(std::pair<char, char> request_pair);
 
   float getFrequency();
   float getActivePower();
@@ -49,6 +81,11 @@ class Modbus {
 
  private:
   /**
+   * @brief Compute the required checksum bits for a given Modbus data frame
+   */
+  void computeRequestChecksum(std::array<char, 8> &request_frame);
+
+  /**
    * @brief Send a defined request frame to the meter through MODBUS, retrieve
    * the response from the meter, and convert the result into a float.
    */
@@ -75,7 +112,29 @@ class Modbus {
   std::array<float, kSizeOfAverageArrays> averaging_power_data_ = {};
   int average_count_ = 0;
 
+  /**
+   * Request Format:
+   * - Address of device
+   * - Function Code (0x04 for read data)
+   * - High byte for parameter (eg, frequency = 0x00)
+   * - Low byte for parameter (eg, frequency = 0x46)
+   * - Number of registers high
+   * - Number of registers low
+   * - Error check low
+   * - Error check high
+   * Checksum bytes will be computed by computeRequestChecksum()
+   */
+  std::array<char, 8> request_frame_ = {static_cast<char>(device_address_),
+                                        kModbusRead,
+                                        0x00,
+                                        0x00,
+                                        kModbusPointsHi,
+                                        kModbusPointsLo,
+                                        0x00,
+                                        0x00};
+
   Serial serial_;
   utils::Logger &logger_;
+  int device_address_;
 };
 }  // namespace waterwheel::hardware
