@@ -40,7 +40,6 @@ int main(int argc, char *argv[]) {
 
   auto monitor = waterwheel::hardware::Modbus(logger, port_number);
 
-  // TODO - Can this big loop with print statements be cleaned up?
   while (true) {
     // Break between each record
     std::cout << std::endl;
@@ -48,6 +47,8 @@ int main(int argc, char *argv[]) {
     float frequency = monitor.getFrequency();
     float average_frequency = monitor.getAverageFrequency(frequency);
     // TODO - Centering of prints is done with tabs here; is there a better way?
+    // TODO - Prints with averages to be moved to the appropriate function in
+    // hardware::Modbus
     logger.log(waterwheel::utils::LogLevel::kInfo,
                "Frequency (Hz):              %2.1f   Average Frequency (Hz):   "
                "  %2.1f",
@@ -62,32 +63,12 @@ int main(int argc, char *argv[]) {
         active_power, average_active_power);
 
     float total_active_energy = monitor.getTotalActiveEnergy();
-    logger.log(waterwheel::utils::LogLevel::kInfo,
-               "Total Active Energy (kWh):   %2.0f", total_active_energy);
-
     float voltage = monitor.getVoltage();
-    logger.log(waterwheel::utils::LogLevel::kInfo,
-               "Voltage (V):                 %2.1f", voltage);
-
     float current = monitor.getCurrent();
-    logger.log(waterwheel::utils::LogLevel::kInfo,
-               "Current (A):                 %2.3f", current);
-
     float reactive_power = monitor.getReactivePower();
-    logger.log(waterwheel::utils::LogLevel::kInfo,
-               "Reactive Power (VAr):        %2.3f", reactive_power);
-
     float apparent_power = monitor.getApparentPower();
-    logger.log(waterwheel::utils::LogLevel::kInfo,
-               "Apparent Power (VA):         %2.3f", apparent_power);
-
     float power_factor = monitor.getPowerFactor();
-    logger.log(waterwheel::utils::LogLevel::kInfo,
-               "Power Factor:                %2.3f", power_factor);
-
     float phase_angle = monitor.getPhaseAngle();
-    logger.log(waterwheel::utils::LogLevel::kInfo,
-               "Phase Angle (degrees):       %2.3f", phase_angle);
 
     // TODO - Find a better way to do this
     monitor.incrementAverage();

@@ -8,6 +8,9 @@
 #include <utils/logger.hpp>
 #include <utils/utils.hpp>
 
+// TODO - enum class for each kind of read from the meter? Would allow the nine
+// get functions to be consolidated into a single function
+
 namespace waterwheel::hardware {
 class Modbus {
  public:
