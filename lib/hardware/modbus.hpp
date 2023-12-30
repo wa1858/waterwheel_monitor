@@ -11,6 +11,7 @@
 
 namespace waterwheel::hardware {
 
+// TODO - Restructure for use with many different Modbus peripherals?
 // Device address can be in range 1-247 inclusive
 constexpr static uint8_t kDefaultDeviceAddress = 0x01;
 
@@ -75,14 +76,14 @@ class Modbus {
   float getAverage(float value, std::array<float, 10> &array);
 
   /**
-   * @brief Converts four 8-bit ints to an equivalent 32-bit float.
-   * Implemnted as the energy meter generates data in floating point format
-   * spread across four bytes
+   * @brief Converts four bytes from the Modbus repsonse into an equivalent
+   * 32-bit float. Implemnted as the energy meter generates data in floating
+   * point format spread across four bytes
    */
   float convertDataToFloat(const std::array<uint8_t, 9> &data_frame);
 
  private:
-  // Additional MODBUS frame constants from datasheet
+  // Additional Modbus frame constants from datasheet
   constexpr static uint8_t kModbusRead = 0x04;
   constexpr static uint8_t kModbusPointsHi = 0x00;
   constexpr static uint8_t kModbusPointsLo = 0x02;
