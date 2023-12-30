@@ -2,12 +2,12 @@
 
 namespace waterwheel::utils {
 Logger::Logger(LogLevel level) : level_(level) {
-  createLogFile();
+  createLogFiles();
   log(LogLevel::kDebug, "Logger created");
 }
 Logger::~Logger() {
   log(LogLevel::kDebug, "Logger destroyed");
-  fclose(log_file_);
+  fclose(log_file_all_time);
 }
 
 void Logger::log(LogLevel logLevel, const char *message, ...) {
@@ -45,12 +45,14 @@ void Logger::log(LogLevel logLevel, const char *message, ...) {
     fprintf(file, "\n");
     va_end(args);
 
-    if (log_file_ != nullptr) {
+    // TODO - Format logs for saving to disk as a record
+    // TODO - Write logs to files
+    if (log_file_all_time != nullptr) {
       output = time + head + message;
       va_list args;
       va_start(args, message);
-      vfprintf(log_file_, output.c_str(), args);
-      fprintf(log_file_, "\n");
+      vfprintf(log_file_all_time, output.c_str(), args);
+      fprintf(log_file_all_time, "\n");
       va_end(args);
     }
   }
@@ -74,30 +76,44 @@ std::string Logger::getTimeStamp() {
   return ss.str();
 }
 
-void Logger::createLogFile() {
+void Logger::createLogFiles() {
   if (!std::filesystem::exists(kLogFileDirectory)) {
     std::filesystem::create_directory(kLogFileDirectory);
     log(LogLevel::kDebug, "Log file directory created at .\\%s",
         kLogFileDirectory.c_str());
   }
 
-  // Get the current date for use in the name of the log file
-  auto currentTime = std::chrono::system_clock::now();
-  auto currentTime_t = std::chrono::system_clock::to_time_t(currentTime);
-  auto *currentTm = std::localtime(&currentTime_t);
-  std::ostringstream ss;
-  ss << std::put_time(currentTm, "%Y%m%d");
-  std::string date = ss.str();
-
-  std::string log_file_path =
-      kLogFileDirectory + "/" + kLogFilePrefix + date + kLogFileType;
-  // Open the file, appending if it already exists
-  log_file_ = fopen(log_file_path.c_str(), "a");
-  if (log_file_ == nullptr) {
-    log(LogLevel::kWarning, "Unable to create log file on disk");
+  // TODO - Logs only being saved after std::cin - Needs fixing
+  std::string path_log_file_all_time =
+      kLogFileDirectory + "/" + kLogFileAllTime;
+  // Open the all time file for appending
+  log_file_all_time = fopen(path_log_file_all_time.c_str(), "a");
+  if (log_file_all_time == nullptr) {
+    log(LogLevel::kWarning, "Unable to open %s",
+        path_log_file_all_time.c_str());
     return;
   }
-  log(LogLevel::kDebug, "Log File Opened: %s", log_file_path.c_str());
+
+  // Check if file is empty and needs header applied
+  fseek(log_file_all_time, 0, SEEK_END);
+  uint8_t size = ftell(log_file_all_time);
+  if (size == 0) {
+    addLogHeader(log_file_all_time);
+  }
+  log(LogLevel::kDebug, "Log File Opened: %s", path_log_file_all_time.c_str());
+
+  // TODO - Create and open the rolling log file
+}
+
+void Logger::addLogHeader(FILE *file) {
+  // Construct the header from format array
+  std::string s = "";
+  for (int i = 0; i < kLogFileRecordsFormat.size(); ++i) {
+    s += kLogFileRecordsFormat[i] + " ";
+  }
+  // Replace final space with new line
+  s[s.length() - 1] = '\n';
+  fwrite(s.c_str(), 1, s.length(), file);
 }
 
 }  // namespace waterwheel::utils

@@ -38,17 +38,57 @@ class Logger {
   std::string getTimeStamp();
 
   /**
-   * @brief Generate a log file for the current day on disk
+   * @brief Generate two log files on disk: An all-time file for appending, and
+   * a rolling file to hold the last ~2 hours of data
    */
-  void createLogFile();
+  void createLogFiles();
+
+  /**
+   * @brief Upon creation of a new log file, write the record format to the top
+   * of the file (for use by records writer and by log parser)
+   */
+  void addLogHeader(FILE *file);
 
  private:
   LogLevel level_;
-  FILE *log_file_ = nullptr;
+  FILE *log_file_all_time = nullptr;
+  FILE *log_file_rolling = nullptr;
 
   const std::string kLogFileDirectory = "logs";
-  const std::string kLogFilePrefix = "log_";
   const std::string kLogFileType = ".txt";
+  const std::string kLogFileRolling = "log_rolling" + kLogFileType;
+  const std::string kLogFileAllTime = "log_all_time" + kLogFileType;
+
+  // Constant used to pad space in log record format
+  const std::string kLogFileHeaderSpare = "spare";
+
+  /**
+   * Format of records in log file:
+   * - Timestamp
+   * - Log level
+   * - All measurements taken (with spare slots for future expansion)
+   */
+  const std::array<std::string, 20> kLogFileRecordsFormat = {
+      "time",
+      "level",
+      "freq",
+      "freq_avg",
+      "active_power",
+      "active_power_avg",
+      "total_energy",
+      "voltage",
+      "current",
+      "reactive_power",
+      "apparent_power",
+      "power_factor",
+      "phase_angle",
+      kLogFileHeaderSpare,
+      kLogFileHeaderSpare,
+      kLogFileHeaderSpare,
+      kLogFileHeaderSpare,
+      kLogFileHeaderSpare,
+      kLogFileHeaderSpare,
+      kLogFileHeaderSpare};
 
   /**
    * Debug: Green text, black background
