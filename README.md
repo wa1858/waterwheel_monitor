@@ -41,9 +41,9 @@ To build the project, run the following commands from the project root:
     $ make
 
 
-The output executable can be found and ran (on Windows) here:
+The output executable can be found and ran (on Windows) here, substituting `{revision}` with the build's revision number:
 
-    $ ./bin/waterwheel_monitor
+    $ ./bin/waterwheel_monitor_{revision}
 
 To run the program in debug mode, add the flag `-d` when running.
 
