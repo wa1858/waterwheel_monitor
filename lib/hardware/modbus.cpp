@@ -16,10 +16,10 @@ Modbus::~Modbus() {
 }
 
 float Modbus::readValue(std::pair<uint8_t, uint8_t> request_pair) {
+  // Construct request frame
   request_frame_[0] = device_address_;
   request_frame_[2] = request_pair.first;
   request_frame_[3] = request_pair.second;
-
   computeRequestChecksum(request_frame_);
   logger_.log(
       utils::LogLevel::kDebug,
@@ -28,22 +28,25 @@ float Modbus::readValue(std::pair<uint8_t, uint8_t> request_pair) {
       request_frame_[3], request_frame_[4], request_frame_[5],
       request_frame_[6], request_frame_[7]);
 
-  float result = getData(request_frame_);
-  return result;
+  // Send request and receive response
+  serial_.writeData(request_frame_);
+  std::array<uint8_t, 9> response_frame;
+  serial_.readData(response_frame);
+  return convertDataToFloat(response_frame);
 }
 
-// Implemented based on MODBUS documentation for meter
+// Implemented based on Modbus documentation, Section 3.5.2
 void Modbus::computeRequestChecksum(std::array<uint8_t, 8> &request_frame) {
   // Preload 16-bit register with all 1s
   uint16_t reg = 0xFFFF;
-  // For every byte (apart from the two error checking bytes being computed)
+  // For every byte (except the two error checking bytes being computed)
   for (int i = 0; i < request_frame.size() - 2; ++i) {
     // XOR reg with byte
     reg ^= request_frame[i];
     // For every bit in the byte
     for (int j = 0; j < 8; ++j) {
       if (reg & 0x001) {
-        // 0xA001 value from MODBUS documentation
+        // 0xA001 value from Modbus documentation
         reg = (reg >> 1) ^ 0xA001;
       } else {
         reg = reg >> 1;
@@ -53,13 +56,6 @@ void Modbus::computeRequestChecksum(std::array<uint8_t, 8> &request_frame) {
   // Split result into two checksum bytes
   request_frame[6] = (reg & 0xFF);
   request_frame[7] = ((reg >> 8) & 0xFF);
-}
-
-float Modbus::getData(const std::array<uint8_t, 8> &request) {
-  serial_.writeData(request);
-  std::array<uint8_t, 9> response;
-  serial_.readData(response);
-  return convertDataToFloat(response);
 }
 
 float Modbus::getAverage(float value,

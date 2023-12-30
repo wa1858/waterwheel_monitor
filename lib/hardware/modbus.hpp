@@ -14,7 +14,7 @@ namespace waterwheel::hardware {
 // Device address can be in range 1-247 inclusive
 constexpr static uint8_t kDefaultDeviceAddress = 0x01;
 
-// Start Address Hi and Lo for each MODBUS request
+// Start Address Hi and Lo for each Modbus request, as defined in datasheet
 constexpr static std::pair<uint8_t, uint8_t> kFrequency(0x00, 0x46);
 constexpr static std::pair<uint8_t, uint8_t> kActivePower(0x00, 0x0C);
 constexpr static std::pair<uint8_t, uint8_t> kTotalActiveEnergy(0x01, 0x56);
@@ -32,7 +32,8 @@ class Modbus {
   ~Modbus();
 
   /**
-   * @brief Construct and send a read request frame to the meter via MODBUS
+   * @brief Construct and send a read request frame to the meter via Modbus,
+   * retrieve the response, and convert the result into a float.
    */
   float readValue(std::pair<uint8_t, uint8_t> request_pair);
 
@@ -66,12 +67,6 @@ class Modbus {
    * (CRC-16)
    */
   void computeRequestChecksum(std::array<uint8_t, 8> &request_frame);
-
-  /**
-   * @brief Send a defined request frame to the meter through MODBUS, retrieve
-   * the response from the meter, and convert the result into a float.
-   */
-  float getData(const std::array<uint8_t, 8> &request);
 
   /**
    * @brief Determine the average value of the elements of an array. Used for
@@ -109,11 +104,11 @@ class Modbus {
    * - Number of registers low
    * - Error check low
    * - Error check high
-   * Checksum bytes will be computed by computeRequestChecksum()
+   * Dynamic values initialised as 0x00
    */
   std::array<uint8_t, 8> request_frame_ = {
-      device_address_, kModbusRead,     0x00, 0x00,
-      kModbusPointsHi, kModbusPointsLo, 0x00, 0x00};
+      0x00, kModbusRead, 0x00, 0x00, kModbusPointsHi, kModbusPointsLo,
+      0x00, 0x00};
 
   Serial serial_;
   utils::Logger &logger_;
