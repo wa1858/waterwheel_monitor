@@ -1,20 +1,17 @@
 #pragma once
 
 #include <array>
+#include <core/logger.hpp>
 #include <hardware/requests.hpp>
 #include <hardware/serial.hpp>
 #include <iostream>
 #include <sstream>
-#include <utils/logger.hpp>
 #include <utils/utils.hpp>
 
-// TODO - enum class for each kind of read from the meter? Would allow the nine
-// get functions to be consolidated into a single function
-
-namespace waterwheel::hardware {
+namespace waterwheel::core {
 class Modbus {
  public:
-  Modbus(utils::Logger &logger_, int port_number);
+  Modbus(core::Logger &logger_, int port_number);
   ~Modbus();
 
   float getFrequency();
@@ -78,7 +75,7 @@ class Modbus {
   std::array<float, kSizeOfAverageArrays> averaging_power_data_ = {};
   int average_count_ = 0;
 
-  Serial serial_;
-  utils::Logger &logger_;
+  hardware::Serial serial_;
+  core::Logger &logger_;
 };
-}  // namespace waterwheel::hardware
+}  // namespace waterwheel::core

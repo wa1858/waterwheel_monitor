@@ -1,14 +1,14 @@
 #include "modbus.hpp"
 
-namespace waterwheel::hardware {
-Modbus::Modbus(utils::Logger &logger, int port_number)
+namespace waterwheel::core {
+Modbus::Modbus(core::Logger &logger, int port_number)
     : logger_(logger), serial_(logger, port_number) {
-  logger_.log(utils::LogLevel::kDebug, "New Modbus created");
+  this->logger_.log(core::LogLevel::kDebug, "New Modbus created");
 }
 
 Modbus::~Modbus() {
-  serial_.~Serial();
-  logger_.log(utils::LogLevel::kDebug, "Modbus object destroyed");
+  this->serial_.hardware::Serial::~Serial();
+  this->logger_.log(core::LogLevel::kDebug, "Modbus object destroyed");
 }
 
 float Modbus::getData(const std::array<char, 8> &request) {
@@ -55,7 +55,7 @@ float Modbus::convertDataToFloat(const std::array<char, 9> &bytes_to_read) {
   return f;
 }
 
-float Modbus::getFrequency() { return getData(kRequestFrequency); }
+float Modbus::getFrequency() { return getData(hardware::kRequestFrequency); }
 
 float Modbus::getAverageFrequency(float frequency) {
   return getAverage(frequency, averaging_frequency_data_);
@@ -64,70 +64,45 @@ float Modbus::getAverageFrequency(float frequency) {
 // TODO - Find a better audio prompt than MessageBeep
 void Modbus::checkAverageFrequency(float average_frequency) {
   if (average_frequency > kFrequencyMax) {
-    logger_.log(utils::LogLevel::kWarning,
+    logger_.log(core::LogLevel::kWarning,
                 "%2.1fHz average frequency - OVERSPEED WARNING",
                 average_frequency);
     MessageBeep(MB_ICONWARNING);
   } else if (average_frequency < kFrequencyMin) {
-    logger_.log(utils::LogLevel::kWarning,
+    logger_.log(core::LogLevel::kWarning,
                 "%2.1fHz average frequency - UNDERSPEED WARNING",
                 average_frequency);
     MessageBeep(MB_ICONWARNING);
   }
 }
 
-float Modbus::getActivePower() { return getData(kRequestActivePower); }
+float Modbus::getActivePower() {
+  return getData(hardware::kRequestActivePower);
+}
 
 float Modbus::getAverageActivePower(float active_power) {
   return getAverage(active_power, averaging_power_data_);
 }
 
 float Modbus::getTotalActiveEnergy() {
-  float total_active_energy = getData(kRequestTotalActiveEnergy);
-  logger_.log(utils::LogLevel::kInfo, "Total Active Energy (kWh):   %2.0f",
-              total_active_energy);
-  return total_active_energy;
+  return getData(hardware::kRequestTotalActiveEnergy);
 }
 
-float Modbus::getVoltage() {
-  float voltage = getData(kRequestVoltage);
-  logger_.log(utils::LogLevel::kInfo, "Voltage (V):                 %2.1f",
-              voltage);
-  return voltage;
-}
+float Modbus::getVoltage() { return getData(hardware::kRequestVoltage); }
 
-float Modbus::getCurrent() {
-  float current = getData(kRequestCurrent);
-  logger_.log(utils::LogLevel::kInfo, "Current (A):                 %2.3f",
-              current);
-  return current;
-}
+float Modbus::getCurrent() { return getData(hardware::kRequestCurrent); }
 
 float Modbus::getReactivePower() {
-  float reactive_power = getData(kRequestReactivePower);
-  logger_.log(utils::LogLevel::kInfo, "Reactive Power (VAr):        %2.3f",
-              reactive_power);
-  return reactive_power;
+  return getData(hardware::kRequestReactivePower);
 }
 
 float Modbus::getApparentPower() {
-  float apparent_power = getData(kRequestApparentPower);
-  logger_.log(utils::LogLevel::kInfo, "Apparent Power (VA):         %2.3f",
-              apparent_power);
-  return apparent_power;
+  return getData(hardware::kRequestApparentPower);
 }
 
 float Modbus::getPowerFactor() {
-  float power_factor = getData(kRequestPowerFactor);
-  logger_.log(utils::LogLevel::kInfo, "Power Factor:                %2.3f",
-              power_factor);
-  return power_factor;
+  return getData(hardware::kRequestPowerFactor);
 }
 
-float Modbus::getPhaseAngle() {
-  float phase_angle = getData(kRequestPhaseAngle);
-  logger_.log(utils::LogLevel::kInfo, "Phase Angle (degrees):       %2.3f",
-              phase_angle);
-  return phase_angle;
-}
-}  // namespace waterwheel::hardware
+float Modbus::getPhaseAngle() { return getData(hardware::kRequestPhaseAngle); }
+}  // namespace waterwheel::core

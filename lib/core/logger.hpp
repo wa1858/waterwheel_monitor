@@ -10,7 +10,7 @@
 #include <sstream>
 #include <string>
 
-namespace waterwheel::utils {
+namespace waterwheel::core {
 
 /**
  * kDebug: Additional info for debugging (object created, value set, etc)
@@ -102,4 +102,4 @@ class Logger {
   const std::string kColourFormatFatal = "\x1b[31m";
   const std::string kColourFormatReset = "\x1b[0m";
 };
-}  // namespace waterwheel::utils
+}  // namespace waterwheel::core

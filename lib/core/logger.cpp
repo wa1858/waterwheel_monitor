@@ -1,6 +1,6 @@
 #include "logger.hpp"
 
-namespace waterwheel::utils {
+namespace waterwheel::core {
 Logger::Logger(LogLevel level) : level_(level) {
   createLogFiles();
   log(LogLevel::kDebug, "Logger created");
@@ -116,4 +116,4 @@ void Logger::addLogHeader(FILE *file) {
   fwrite(s.c_str(), 1, s.length(), file);
 }
 
-}  // namespace waterwheel::utils
+}  // namespace waterwheel::core
