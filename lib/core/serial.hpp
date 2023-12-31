@@ -6,7 +6,7 @@
 #include <array>
 #include <core/logger.hpp>
 
-namespace waterwheel::hardware {
+namespace waterwheel::core {
 // TODO - Return optional type for constructors?
 class Serial {
  public:
@@ -40,4 +40,4 @@ class Serial {
   core::Logger &logger_;
   HANDLE serial_;
 };
-}  // namespace waterwheel::hardware
+}  // namespace waterwheel::core

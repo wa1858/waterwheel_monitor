@@ -4,7 +4,7 @@
 
 #include <array>
 #include <core/logger.hpp>
-#include <hardware/serial.hpp>
+#include <core/serial.hpp>
 #include <iostream>
 #include <sstream>
 #include <utils/utils.hpp>
@@ -16,7 +16,7 @@ constexpr static uint8_t kDefaultDeviceAddress = 0x01;
 
 class Modbus {
  protected:
-  Modbus(utils::Logger &logger, uint8_t port_number,
+  Modbus(Logger &logger, uint8_t port_number,
          uint8_t device_address = kDefaultDeviceAddress);
   ~Modbus();
 
@@ -55,8 +55,8 @@ class Modbus {
    */
   std::array<uint8_t, 8> request_frame_ = {};
 
-  hardware::Serial serial_;
-  core::Logger &logger_;
+  Serial serial_;
+  Logger &logger_;
   uint8_t device_address_;
 };
 }  // namespace waterwheel::core

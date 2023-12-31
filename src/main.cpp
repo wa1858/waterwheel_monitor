@@ -1,8 +1,7 @@
 #include <core/logger.hpp>
-#include <core/modbus.hpp>
+#include <core/serial.hpp>
 #include <cstring>
 #include <hardware/energy_meter.hpp>
-#include <hardware/serial.hpp>
 #include <utils/debug.hpp>
 #include <utils/utils.hpp>
 // #include "config.h"
@@ -33,7 +32,7 @@ int main(int argc, char *argv[]) {
 
   // TODO - Find a better way of calling debug mode functions
   int delay_amount = waterwheel::utils::kDefaultDelay;
-  int device_address = waterwheel::hardware::kDefaultDeviceAddress;
+  int device_address = waterwheel::core::kDefaultDeviceAddress;
   if (debug_mode) {
     waterwheel::utils::debugConfigureDelay(logger, &delay_amount);
     // TODO - debugSetModbusAddress();

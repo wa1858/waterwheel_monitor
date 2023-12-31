@@ -1,6 +1,6 @@
 #include "serial.hpp"
 
-namespace waterwheel::hardware {
+namespace waterwheel::core {
 Serial::Serial(core::Logger &logger, int portNumber) : logger_(logger) {
   serial_ = setUpSerial(portNumber);
   logger_.log(core::LogLevel::kDebug, "New Serial created");
@@ -94,4 +94,4 @@ void Serial::readData(std::array<uint8_t, 9> &response) {
     logger_.log(core::LogLevel::kWarning, "Could not read from serial port");
   }
 }
-}  // namespace waterwheel::hardware
+}  // namespace waterwheel::core

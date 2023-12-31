@@ -2,7 +2,7 @@
 
 #include <windows.h>
 
-#include <hardware/modbus.hpp>
+#include <core/modbus.hpp>
 
 namespace waterwheel::hardware {
 
@@ -18,10 +18,10 @@ constexpr static std::pair<uint8_t, uint8_t> kRequestApparentPower(0x00, 0x12);
 constexpr static std::pair<uint8_t, uint8_t> kRequestPowerFactor(0x00, 0x1E);
 constexpr static std::pair<uint8_t, uint8_t> kRequestPhaseAngle(0x00, 0x24);
 
-class EnergyMeter : Modbus {
+class EnergyMeter : core::Modbus {
  public:
-  EnergyMeter(utils::Logger &logger, uint8_t port_number,
-              uint8_t device_address = kDefaultDeviceAddress);
+  EnergyMeter(core::Logger &logger, uint8_t port_number,
+              uint8_t device_address = core::kDefaultDeviceAddress);
   ~EnergyMeter();
 
   /**
@@ -74,6 +74,6 @@ class EnergyMeter : Modbus {
   std::array<float, kSizeOfAverageArrays> averaging_power_data_ = {};
   int average_count_ = 0;
 
-  utils::Logger logger_;
+  core::Logger logger_;
 };
 }  // namespace waterwheel::hardware

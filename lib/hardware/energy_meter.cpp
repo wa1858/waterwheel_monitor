@@ -2,15 +2,15 @@
 
 namespace waterwheel::hardware {
 
-EnergyMeter::EnergyMeter(utils::Logger &logger, uint8_t port_number,
+EnergyMeter::EnergyMeter(core::Logger &logger, uint8_t port_number,
                          uint8_t device_address)
-    : Modbus(logger, port_number, device_address), logger_(logger) {
-  logger_.log(utils::LogLevel::kDebug, "New Energy Meter (%d) created",
+    : core::Modbus(logger, port_number, device_address), logger_(logger) {
+  logger_.log(core::LogLevel::kDebug, "New Energy Meter (%d) created",
               device_address);
 }
 
 EnergyMeter::~EnergyMeter() {
-  logger_.log(utils::LogLevel::kDebug, "Energy Meter (%d) destroyed",
+  logger_.log(core::LogLevel::kDebug, "Energy Meter (%d) destroyed",
               getDeviceAddress());
 }
 
@@ -51,12 +51,12 @@ float EnergyMeter::getAverageFrequency(float frequency) {
 // TODO - Find a better audio prompt than MessageBeep
 void EnergyMeter::checkAverageFrequency(float average_frequency) {
   if (average_frequency > kFrequencyMax) {
-    logger_.log(utils::LogLevel::kWarning,
+    logger_.log(core::LogLevel::kWarning,
                 "%2.1fHz average frequency - OVERSPEED WARNING",
                 average_frequency);
     MessageBeep(MB_ICONWARNING);
   } else if (average_frequency < kFrequencyMin) {
-    logger_.log(utils::LogLevel::kWarning,
+    logger_.log(core::LogLevel::kWarning,
                 "%2.1fHz average frequency - UNDERSPEED WARNING",
                 average_frequency);
     MessageBeep(MB_ICONWARNING);
