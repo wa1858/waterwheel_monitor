@@ -1,6 +1,6 @@
 #include "logger.hpp"
 
-namespace waterwheel::utils {
+namespace waterwheel::core {
 Logger::Logger(LogLevel level) : level_(level) {
   this->log(LogLevel::kDebug, "Logger created");
 }
@@ -45,4 +45,4 @@ void Logger::log(LogLevel logLevel, const char *message, ...) {
     va_end(args);
   }
 }
-}  // namespace waterwheel::utils
+}  // namespace waterwheel::core

@@ -1,14 +1,14 @@
 #include "modbus.hpp"
 
-namespace waterwheel::hardware {
-Modbus::Modbus(utils::Logger &logger, int port_number)
+namespace waterwheel::core {
+Modbus::Modbus(core::Logger &logger, int port_number)
     : logger_(logger), serial_(logger, port_number) {
-  this->logger_.log(utils::LogLevel::kDebug, "New Modbus created");
+  this->logger_.log(core::LogLevel::kDebug, "New Modbus created");
 }
 
 Modbus::~Modbus() {
-  this->serial_.~Serial();
-  this->logger_.log(utils::LogLevel::kDebug, "Modbus object destroyed");
+  this->serial_.hardware::Serial::~Serial();
+  this->logger_.log(core::LogLevel::kDebug, "Modbus object destroyed");
 }
 
 float Modbus::getData(const std::array<char, 8> &request) {
@@ -55,7 +55,7 @@ float Modbus::convertDataToFloat(const std::array<char, 9> &bytes_to_read) {
   return f;
 }
 
-float Modbus::getFrequency() { return getData(kRequestFrequency); }
+float Modbus::getFrequency() { return getData(hardware::kRequestFrequency); }
 
 float Modbus::getAverageFrequency(float frequency) {
   return getAverage(frequency, averaging_frequency_data_);
@@ -64,37 +64,45 @@ float Modbus::getAverageFrequency(float frequency) {
 // TODO - Find a better audio prompt than MessageBeep
 void Modbus::checkAverageFrequency(float average_frequency) {
   if (average_frequency > kFrequencyMax) {
-    logger_.log(utils::LogLevel::kWarning,
+    logger_.log(core::LogLevel::kWarning,
                 "%2.1fHz average frequency - OVERSPEED WARNING",
                 average_frequency);
     MessageBeep(MB_ICONWARNING);
   } else if (average_frequency < kFrequencyMin) {
-    logger_.log(utils::LogLevel::kWarning,
+    logger_.log(core::LogLevel::kWarning,
                 "%2.1fHz average frequency - UNDERSPEED WARNING",
                 average_frequency);
     MessageBeep(MB_ICONWARNING);
   }
 }
 
-float Modbus::getActivePower() { return getData(kRequestActivePower); }
+float Modbus::getActivePower() {
+  return getData(hardware::kRequestActivePower);
+}
 
 float Modbus::getAverageActivePower(float active_power) {
   return getAverage(active_power, averaging_power_data_);
 }
 
 float Modbus::getTotalActiveEnergy() {
-  return getData(kRequestTotalActiveEnergy);
+  return getData(hardware::kRequestTotalActiveEnergy);
 }
 
-float Modbus::getVoltage() { return getData(kRequestVoltage); }
+float Modbus::getVoltage() { return getData(hardware::kRequestVoltage); }
 
-float Modbus::getCurrent() { return getData(kRequestCurrent); }
+float Modbus::getCurrent() { return getData(hardware::kRequestCurrent); }
 
-float Modbus::getReactivePower() { return getData(kRequestReactivePower); }
+float Modbus::getReactivePower() {
+  return getData(hardware::kRequestReactivePower);
+}
 
-float Modbus::getApparentPower() { return getData(kRequestApparentPower); }
+float Modbus::getApparentPower() {
+  return getData(hardware::kRequestApparentPower);
+}
 
-float Modbus::getPowerFactor() { return getData(kRequestPowerFactor); }
+float Modbus::getPowerFactor() {
+  return getData(hardware::kRequestPowerFactor);
+}
 
-float Modbus::getPhaseAngle() { return getData(kRequestPhaseAngle); }
-}  // namespace waterwheel::hardware
+float Modbus::getPhaseAngle() { return getData(hardware::kRequestPhaseAngle); }
+}  // namespace waterwheel::core
