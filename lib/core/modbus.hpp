@@ -3,14 +3,13 @@
 #include <stdint.h>
 
 #include <array>
+#include <core/logger.hpp>
 #include <hardware/serial.hpp>
 #include <iostream>
 #include <sstream>
-#include <utils/logger.hpp>
 #include <utils/utils.hpp>
 
-namespace waterwheel::hardware {
-
+namespace waterwheel::core {
 // TODO - Check that no two devices have the same address on construction
 // Device address can be in range 1-247 inclusive
 constexpr static uint8_t kDefaultDeviceAddress = 0x01;
@@ -56,8 +55,8 @@ class Modbus {
    */
   std::array<uint8_t, 8> request_frame_ = {};
 
-  Serial serial_;
-  utils::Logger &logger_;
+  hardware::Serial serial_;
+  core::Logger &logger_;
   uint8_t device_address_;
 };
-}  // namespace waterwheel::hardware
+}  // namespace waterwheel::core

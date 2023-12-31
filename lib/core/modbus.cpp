@@ -1,24 +1,21 @@
 #include "modbus.hpp"
 
-namespace waterwheel::hardware {
-Modbus::Modbus(utils::Logger &logger, uint8_t port_number,
-               uint8_t device_address)
+namespace waterwheel::core {
+Modbus::Modbus(Logger &logger, uint8_t port_number, uint8_t device_address)
     : logger_(logger),
       serial_(logger, port_number),
       device_address_(device_address) {
-  logger_.log(utils::LogLevel::kDebug, "New Modbus(%d) created",
-              device_address_);
+  logger_.log(LogLevel::kDebug, "New Modbus(%d) created", device_address_);
 }
 
 Modbus::~Modbus() {
-  logger_.log(utils::LogLevel::kDebug, "Modbus(%d) object destroyed",
-              device_address_);
+  logger_.log(LogLevel::kDebug, "Modbus(%d) object destroyed", device_address_);
 }
 
 float Modbus::sendRequest(std::array<uint8_t, 8> request_frame) {
   computeRequestChecksum(request_frame);
   logger_.log(
-      utils::LogLevel::kDebug,
+      LogLevel::kDebug,
       "Frame constructed: {0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x}",
       request_frame[0], request_frame[1], request_frame[2], request_frame[3],
       request_frame[4], request_frame[5], request_frame[6], request_frame[7]);
@@ -66,4 +63,4 @@ float Modbus::convertDataToFloat(const std::array<uint8_t, 9> &data_frame) {
 
   return f;
 }
-}  // namespace waterwheel::hardware
+}  // namespace waterwheel::core

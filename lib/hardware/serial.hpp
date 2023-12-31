@@ -4,19 +4,19 @@
 #include <windows.h>
 
 #include <array>
-#include <utils/logger.hpp>
+#include <core/logger.hpp>
 
 namespace waterwheel::hardware {
 // TODO - Return optional type for constructors?
 class Serial {
  public:
-  Serial(utils::Logger &logger, int portNumber);
+  Serial(core::Logger &logger, int portNumber);
   ~Serial();
 
   /**
    * @brief Select the serial port to be used at the start of the program
    */
-  static int selectSerialPort(utils::Logger &logger);
+  static int selectSerialPort(core::Logger &logger);
 
   /**
    * @brief Send a data request through the serial port
@@ -37,7 +37,7 @@ class Serial {
   // TODO - static getSerialPorts();
 
  private:
-  utils::Logger &logger_;
+  core::Logger &logger_;
   HANDLE serial_;
 };
 }  // namespace waterwheel::hardware

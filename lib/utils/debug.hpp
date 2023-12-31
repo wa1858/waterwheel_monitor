@@ -1,6 +1,6 @@
 #pragma once
 
-#include <utils/logger.hpp>
+#include <core/logger.hpp>
 #include <utils/utils.hpp>
 
 // TODO Expand the capabilities of debug mode
@@ -14,5 +14,5 @@ constexpr static const char *kDebugFlag = "-d";
 /**
  * @brief Allow user to set their own delay time between measurements
  */
-void debugConfigureDelay(Logger &logger, int *delay);
+void debugConfigureDelay(core::Logger &logger, int *delay);
 }  // namespace waterwheel::utils

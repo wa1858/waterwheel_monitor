@@ -19,6 +19,7 @@ target_include_directories(${target}
     "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 target_link_libraries(${target}
+    library_core
     library_hardware
     library_network
     library_utils

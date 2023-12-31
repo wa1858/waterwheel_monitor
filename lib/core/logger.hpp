@@ -7,7 +7,7 @@
 #include <iostream>
 #include <sstream>
 
-namespace waterwheel::utils {
+namespace waterwheel::core {
 constexpr static const char *kWhitespace = "        ";
 
 /**
@@ -45,4 +45,4 @@ class Logger {
   constexpr static const char *kColourFormatFatal = "\x1b[31m";
   constexpr static const char *kColourFormatReset = "\x1b[0m";
 };
-}  // namespace waterwheel::utils
+}  // namespace waterwheel::core
