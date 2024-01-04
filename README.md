@@ -17,6 +17,7 @@ Underspeed threshold at 44.5Hz average and overspeed threshold at 48.5Hz average
 
 ## Dependencies
 - MinGW-W64
+- G++
 - CMake >= 3.22
 
 These can be installed on Linux with the following commands:
@@ -25,6 +26,7 @@ These can be installed on Linux with the following commands:
     $ sudo apt-get upgrade -y
     $ sudo apt-get install mingw-w64
     $ sudo apt-get install cmake
+    $ sudo apt-get install g++
 
 
 ## Compilation
