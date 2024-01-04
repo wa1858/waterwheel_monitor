@@ -1,5 +1,4 @@
 #include <core/logger.hpp>
-#include <core/serial.hpp>
 #include <cstring>
 #include <hardware/energy_meter.hpp>
 #include <utils/debug.hpp>

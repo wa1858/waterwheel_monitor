@@ -16,12 +16,25 @@ target_include_directories(${target}
     "${CMAKE_SOURCE_DIR}/lib"
     "${CMAKE_CURRENT_SOURCE_DIR}"
 )
+
+# TODO - Good practice? Can this cyclic dependency be removed?
+# Cyclic Dependencies of Static Libraries
+# See: https://cmake.org/cmake/help/latest/command/target_link_libraries.html#id10
 target_link_libraries(${target}
     library_core
     library_hardware
+)
+
+target_link_libraries(${target}
+    library_hardware
+    library_core
+)
+
+target_link_libraries(${target}
     library_network
     library_utils
 )
+
 file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 set_target_properties(${target} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 

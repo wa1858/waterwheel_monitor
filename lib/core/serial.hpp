@@ -10,13 +10,13 @@ namespace waterwheel::core {
 // TODO - Return optional type for constructors?
 class Serial {
  public:
-  Serial(core::Logger &logger, int portNumber);
+  Serial(Logger &logger, int portNumber);
   ~Serial();
 
   /**
    * @brief Select the serial port to be used at the start of the program
    */
-  static int selectSerialPort(core::Logger &logger);
+  static int selectSerialPort(Logger &logger);
 
   /**
    * @brief Send a data request through the serial port
@@ -37,7 +37,7 @@ class Serial {
   // TODO - static getSerialPorts();
 
  private:
-  core::Logger &logger_;
+  Logger &logger_;
   HANDLE serial_;
 };
 }  // namespace waterwheel::core
