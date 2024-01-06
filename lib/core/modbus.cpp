@@ -54,13 +54,21 @@ void Modbus::computeRequestChecksum(std::array<uint8_t, 8> &request_frame) {
 
 float Modbus::convertDataToFloat(const std::array<uint8_t, 9> &data_frame) {
   // Convert four data bytes into a single 32-bit number
-  uint32_t data = (data_frame[3] << 24) + (data_frame[4] << 16) +
-                  (data_frame[5] << 8) + data_frame[6];
+  // uint32_t data = (data_frame[3] << 24) + (data_frame[4] << 16) +
+  // (data_frame[5] << 8) + data_frame[6];
 
   // Assign result to memory assigned for float, resulting in float cast
-  float f;
-  memcpy(&f, &data, sizeof(f));
+  // float f;
+  // memcpy(&f, &data, sizeof(f));
 
-  return f;
+  modbus_data i;
+
+  i.data[0] = data_frame[6];
+  i.data[1] = data_frame[5];
+  i.data[2] = data_frame[4];
+  i.data[3] = data_frame[3];
+
+  return i.result;
+  // return f;
 }
 }  // namespace waterwheel::core

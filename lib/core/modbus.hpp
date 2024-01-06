@@ -55,6 +55,11 @@ class Modbus {
    */
   std::array<uint8_t, 8> request_frame_ = {};
 
+  union modbus_data {
+    std::array<uint8_t, 4> data;
+    float result;
+  };
+
   Serial serial_;
   Logger &logger_;
   uint8_t device_address_;
