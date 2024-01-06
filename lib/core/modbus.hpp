@@ -55,6 +55,7 @@ class Modbus {
    */
   std::array<uint8_t, 8> request_frame_ = {};
 
+  // Used for converting four bytes to float from response frame
   union modbus_data {
     std::array<uint8_t, 4> data;
     float result;
