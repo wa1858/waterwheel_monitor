@@ -14,21 +14,16 @@ Modbus::~Modbus() {
 
 float Modbus::sendRequest(std::array<uint8_t, 8> request_frame) {
   computeRequestChecksum(request_frame);
-  logger_.log(
-      LogLevel::kDebug,
-      "Frame constructed: {0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x}",
-      request_frame[0], request_frame[1], request_frame[2], request_frame[3],
-      request_frame[4], request_frame[5], request_frame[6], request_frame[7]);
 
   // Send request and receive response
   serial_.writeData(request_frame);
-  // TODO - Implement full error checking on Modbus response
   std::array<uint8_t, 9> response_frame = {};
   serial_.readData(response_frame);
 
+  // TODO - Implement full error checking on Modbus response
   // Handle error response if applicable
   // Condition for error response defined in Modbus specification
-  if (response_frame[1] == 0x10000000 | request_frame[1]) {
+  if (response_frame[1] == (0x10000000 | request_frame[1])) {
     return handleResponseError(response_frame);
   }
   return convertDataToFloat(response_frame);
