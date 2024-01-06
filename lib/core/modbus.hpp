@@ -14,6 +14,19 @@ namespace waterwheel::core {
 // Device address can be in range 1-247 inclusive
 constexpr static uint8_t kDefaultDeviceAddress = 0x01;
 
+// All possible error codes from Modbus device
+enum class ModbusErrorCodes {
+  kNoError = 0x00,
+  kIllegalFunction,
+  kIllegalDataAddress,
+  kIllegalDataValue,
+  kDeviceFailure,
+  kAcknowledge,
+  kDeviceBusy,
+  kNegativeAcknowledge,
+  kMemoryParityError
+};
+
 class Modbus {
  protected:
   Modbus(Logger &logger, uint8_t port_number,

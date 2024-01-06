@@ -22,6 +22,7 @@ float Modbus::sendRequest(std::array<uint8_t, 8> request_frame) {
 
   // Send request and receive response
   serial_.writeData(request_frame);
+  // TODO - Implement full error checking on Modbus response
   std::array<uint8_t, 9> response_frame = {};
   serial_.readData(response_frame);
   return convertDataToFloat(response_frame);
