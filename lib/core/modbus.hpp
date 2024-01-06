@@ -15,7 +15,7 @@ namespace waterwheel::core {
 constexpr static uint8_t kDefaultDeviceAddress = 0x01;
 
 // All possible error codes from Modbus device
-enum class ModbusErrorCodes {
+enum ModbusErrorCodes {
   kNoError = 0x00,
   kIllegalFunction,
   kIllegalDataAddress,
@@ -41,6 +41,11 @@ class Modbus {
   uint8_t getDeviceAddress();
 
  private:
+  /**
+   * @brief Handle errors in Modbus device response
+   */
+  float handleResponseError(std::array<uint8_t, 9> error_frame);
+
   /**
    * @brief Compute the required checksum bits for a given Modbus data frame
    * (CRC-16)
