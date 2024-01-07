@@ -1,108 +1,101 @@
 #include "modbus.hpp"
 
 namespace waterwheel::core {
-Modbus::Modbus(core::Logger &logger, int port_number)
-    : logger_(logger), serial_(logger, port_number) {
-  this->logger_.log(core::LogLevel::kDebug, "New Modbus created");
+Modbus::Modbus(Logger &logger, uint8_t port_number, uint8_t device_address)
+    : logger_(logger),
+      serial_(logger, port_number),
+      device_address_(device_address) {
+  logger_.log(LogLevel::kDebug, "New Modbus(%d) created", device_address_);
 }
 
 Modbus::~Modbus() {
-  this->serial_.hardware::Serial::~Serial();
-  this->logger_.log(core::LogLevel::kDebug, "Modbus object destroyed");
+  logger_.log(LogLevel::kDebug, "Modbus(%d) object destroyed", device_address_);
 }
 
-float Modbus::getData(const std::array<char, 8> &request) {
-  serial_.writeData(request);
-  std::array<char, 9> data;
-  serial_.readData(data);
-  return convertDataToFloat(data);
-}
+float Modbus::sendRequest(std::array<uint8_t, 8> request_frame) {
+  computeRequestChecksum(request_frame);
 
-float Modbus::getAverage(float value,
-                         std::array<float, kSizeOfAverageArrays> &array) {
-  array[average_count_] = value;
-  float average = 0.0;
-  for (int i = 0; i < kSizeOfAverageArrays; ++i) {
-    average += array[i];
+  // Send request and receive response
+  serial_.writeData(request_frame);
+  std::array<uint8_t, 9> response_frame = {};
+  serial_.readData(response_frame);
+
+  // TODO - Implement full error checking on Modbus response
+  // Handle error response if applicable
+  // Condition for error response defined in Modbus specification
+  if (response_frame[1] == (0x10000000 | request_frame[1])) {
+    return handleResponseError(response_frame);
   }
-  return average / kSizeOfAverageArrays;
+  return convertDataToFloat(response_frame);
 }
 
-void Modbus::incrementAverage() {
-  ++average_count_;
-  if (average_count_ >= kSizeOfAverageArrays) {
-    average_count_ = 0;
+// TODO - Implement proper error handling
+float Modbus::handleResponseError(std::array<uint8_t, 9> error_frame) {
+  std::string error_message;
+  uint8_t error_code = error_frame[2];
+  switch (error_code) {
+    case ModbusErrorCodes::kIllegalFunction:
+      error_message = "Illegal Function";
+      break;
+    case ModbusErrorCodes::kIllegalDataAddress:
+      error_message = "Illegal Data Address";
+      break;
+    case ModbusErrorCodes::kIllegalDataValue:
+      error_message = "Illegal Data Value";
+      break;
+    case ModbusErrorCodes::kDeviceFailure:
+      error_message = "Device Failure";
+      break;
+    case ModbusErrorCodes::kAcknowledge:
+      error_message = "Acknowledged; Device is processing request...";
+      break;
+    case ModbusErrorCodes::kDeviceBusy:
+      error_message = "Device Busy";
+      break;
+    case ModbusErrorCodes::kNegativeAcknowledge:
+      error_message = "Negative Acknowledge";
+      break;
+    case ModbusErrorCodes::kMemoryParityError:
+      error_message = "Memory Parity Error";
+      break;
+    case ModbusErrorCodes::kNoError:
+    default:
+      error_message = "Unknown Error";
+      break;
   }
+  logger_.log(LogLevel::kWarning, "Modbus device 0x%x response error: 0x%x; %s",
+              error_frame[0], error_code, error_message.c_str());
+  return 0.0;
 }
 
-float Modbus::convertDataToFloat(const std::array<char, 9> &bytes_to_read) {
-  // Note static_cast forces compiler to treat array members as int, not char
-  uint8_t bytes[4];
-  bytes[0] = static_cast<uint8_t>(bytes_to_read[3]);
-  bytes[1] = static_cast<uint8_t>(bytes_to_read[4]);
-  bytes[2] = static_cast<uint8_t>(bytes_to_read[5]);
-  bytes[3] = static_cast<uint8_t>(bytes_to_read[6]);
+uint8_t Modbus::getDeviceAddress() { return device_address_; }
 
-  // Convert the four integers into a single integer representing a 32-bit
-  // number
-  uint32_t int_data =
-      (bytes[0] << 24) + (bytes[1] << 16) + (bytes[2] << 8) + bytes[3];
-
-  // Assign result to memory assigned for float, resulting in float cast
-  float f;
-  memcpy(&f, &int_data, sizeof(float));
-
-  return f;
-}
-
-float Modbus::getFrequency() { return getData(hardware::kRequestFrequency); }
-
-float Modbus::getAverageFrequency(float frequency) {
-  return getAverage(frequency, averaging_frequency_data_);
-}
-
-// TODO - Find a better audio prompt than MessageBeep
-void Modbus::checkAverageFrequency(float average_frequency) {
-  if (average_frequency > kFrequencyMax) {
-    logger_.log(core::LogLevel::kWarning,
-                "%2.1fHz average frequency - OVERSPEED WARNING",
-                average_frequency);
-    MessageBeep(MB_ICONWARNING);
-  } else if (average_frequency < kFrequencyMin) {
-    logger_.log(core::LogLevel::kWarning,
-                "%2.1fHz average frequency - UNDERSPEED WARNING",
-                average_frequency);
-    MessageBeep(MB_ICONWARNING);
+// Implemented based on RS energy meter Modbus documentation, Section 3.5.2
+void Modbus::computeRequestChecksum(std::array<uint8_t, 8> &request_frame) {
+  // Preload 16-bit register with all 1s
+  uint16_t reg = 0xFFFF;
+  // For every byte (except the two error checking bytes being computed)
+  for (int i = 0; i < request_frame.size() - 2; ++i) {
+    // XOR reg with byte
+    reg ^= request_frame[i];
+    // For every bit in the byte
+    for (int j = 0; j < 8; ++j) {
+      if (reg & 0x001) {
+        // 0xA001 value from Modbus documentation
+        reg = (reg >> 1) ^ 0xA001;
+      } else {
+        reg = reg >> 1;
+      }
+    }
   }
+  // Split result into two checksum bytes
+  request_frame[6] = (reg & 0xFF);
+  request_frame[7] = ((reg >> 8) & 0xFF);
 }
 
-float Modbus::getActivePower() {
-  return getData(hardware::kRequestActivePower);
+float Modbus::convertDataToFloat(const std::array<uint8_t, 9> &data_frame) {
+  modbus_data data = {data_frame[6], data_frame[5], data_frame[4],
+                      data_frame[3]};
+  return data.result;
 }
-
-float Modbus::getAverageActivePower(float active_power) {
-  return getAverage(active_power, averaging_power_data_);
-}
-
-float Modbus::getTotalActiveEnergy() {
-  return getData(hardware::kRequestTotalActiveEnergy);
-}
-
-float Modbus::getVoltage() { return getData(hardware::kRequestVoltage); }
-
-float Modbus::getCurrent() { return getData(hardware::kRequestCurrent); }
-
-float Modbus::getReactivePower() {
-  return getData(hardware::kRequestReactivePower);
-}
-
-float Modbus::getApparentPower() {
-  return getData(hardware::kRequestApparentPower);
-}
-
-float Modbus::getPowerFactor() {
-  return getData(hardware::kRequestPowerFactor);
-}
-
-float Modbus::getPhaseAngle() { return getData(hardware::kRequestPhaseAngle); }
 }  // namespace waterwheel::core

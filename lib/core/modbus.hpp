@@ -1,81 +1,86 @@
 #pragma once
 
+#include <stdint.h>
+
 #include <array>
 #include <core/logger.hpp>
-#include <hardware/requests.hpp>
-#include <hardware/serial.hpp>
+#include <core/serial.hpp>
 #include <iostream>
 #include <sstream>
 #include <utils/utils.hpp>
 
 namespace waterwheel::core {
+// TODO - Check that no two devices have the same address on construction
+// Device address can be in range 1-247 inclusive
+constexpr static uint8_t kDefaultDeviceAddress = 0x01;
+
+// All possible error codes from Modbus device
+enum ModbusErrorCodes {
+  kNoError = 0x00,
+  kIllegalFunction,
+  kIllegalDataAddress,
+  kIllegalDataValue,
+  kDeviceFailure,
+  kAcknowledge,
+  kDeviceBusy,
+  kNegativeAcknowledge,
+  kMemoryParityError
+};
+
 class Modbus {
- public:
-  Modbus(core::Logger &logger_, int port_number);
+ protected:
+  Modbus(Logger &logger, uint8_t port_number,
+         uint8_t device_address = kDefaultDeviceAddress);
   ~Modbus();
 
-  float getFrequency();
-  float getActivePower();
-  float getTotalActiveEnergy();
-  float getVoltage();
-  float getCurrent();
-  float getReactivePower();
-  float getApparentPower();
-  float getPowerFactor();
-  float getPhaseAngle();
   /**
-   * @brief Use a set number of previous readings (kSizeOfAverageArrays) to
-   * determine the average frequency.
+   * @brief Send a Modbus request frame and process the result
    */
-  float getAverageFrequency(float frequency);
+  float sendRequest(std::array<uint8_t, 8> request_frame);
 
-  /**
-   * @brief Use a set number of previous readings (kSizeOfAverageArrays) to
-   * determine the average active power.
-   */
-  float getAverageActivePower(float active_power);
-
-  /**
-   * @brief Check that the average frequency is within the upper and lower
-   * limits defined by kFrequencyMax and kFrequencyMin. If outwith these limits,
-   * warn the user.
-   */
-  void checkAverageFrequency(float average_frequency);
-
-  /**
-   * @brief Increment the Class-defined array index for average value arrays
-   */
-  void incrementAverage();
+  uint8_t getDeviceAddress();
 
  private:
   /**
-   * @brief Send a defined request frame to the meter through MODBUS, retrieve
-   * the response from the meter, and convert the result into a float.
+   * @brief Handle errors in Modbus device response
    */
-  float getData(const std::array<char, 8> &request);
+  float handleResponseError(std::array<uint8_t, 9> error_frame);
 
   /**
-   * @brief Determine the average value of the elements of an array. Used for
-   * calculating average frequency and active power
+   * @brief Compute the required checksum bits for a given Modbus data frame
+   * (CRC-16)
    */
-  float getAverage(float value, std::array<float, 10> &array);
+  void computeRequestChecksum(std::array<uint8_t, 8> &request_frame);
 
   /**
-   * @brief Converts four char bytes to an equivalent 32-bit float. Implemnted
-   * as the energy meter generates data in floating point format but program
-   * reads data as four distinct bytes
+   * @brief Converts four bytes from the Modbus repsonse into an equivalent
+   * 32-bit float. Implemnted as the energy meter generates data in floating
+   * point format spread across four bytes
    */
-  float convertDataToFloat(const std::array<char, 9> &bytes_to_read);
+  float convertDataToFloat(const std::array<uint8_t, 9> &data_frame);
 
  private:
-  constexpr static int kSizeOfAverageArrays = 10;
-  constexpr static float kFrequencyMin = 44.5;
-  constexpr static float kFrequencyMax = 48.5;
-  std::array<float, kSizeOfAverageArrays> averaging_frequency_data_ = {};
-  std::array<float, kSizeOfAverageArrays> averaging_power_data_ = {};
-  int average_count_ = 0;
+  /**
+   * Request Format:
+   * - Address of device
+   * - Function Code (0x04 for read data)
+   * - High byte for parameter (eg, frequency = 0x00)
+   * - Low byte for parameter (eg, frequency = 0x46)
+   * - Number of registers high
+   * - Number of registers low
+   * - Error check low
+   * - Error check high
+   */
+  std::array<uint8_t, 8> request_frame_ = {};
 
-  hardware::Serial serial_;
-  core::Logger &logger_;
+  // Used for converting four bytes to float from response frame
+  union modbus_data {
+    std::array<uint8_t, 4> data;
+    float result;
+  };
+
+  Serial serial_;
+  Logger &logger_;
+  uint8_t device_address_;
 };
 }  // namespace waterwheel::core
