@@ -37,11 +37,11 @@ void Modbus::incrementAverage() {
 
 float Modbus::convertDataToFloat(const std::array<char, 9> &bytes_to_read) {
   // Note static_cast forces compiler to treat array members as int, not char
-  int bytes[4];
-  bytes[0] = static_cast<int>(bytes_to_read[3]);
-  bytes[1] = static_cast<int>(bytes_to_read[4]);
-  bytes[2] = static_cast<int>(bytes_to_read[5]);
-  bytes[3] = static_cast<int>(bytes_to_read[6]);
+  uint8_t bytes[4];
+  bytes[0] = static_cast<uint8_t>(bytes_to_read[3]);
+  bytes[1] = static_cast<uint8_t>(bytes_to_read[4]);
+  bytes[2] = static_cast<uint8_t>(bytes_to_read[5]);
+  bytes[3] = static_cast<uint8_t>(bytes_to_read[6]);
 
   // Convert the four integers into a single integer representing a 32-bit
   // number
