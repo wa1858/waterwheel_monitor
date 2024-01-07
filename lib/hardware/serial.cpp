@@ -34,7 +34,7 @@ HANDLE Serial::setUpSerial(int portNumber) {
   std::string port = ss.str();
 
   // Open the desired serial_ port
-  logger_.log(core::LogLevel::kInfo, "Opening serial port COM%d", portNumber);
+  logger_.log(core::LogLevel::kDebug, "Opening serial port COM%d", portNumber);
 
   HANDLE hSerial =
       CreateFile(port.c_str(), GENERIC_READ | GENERIC_WRITE, 0, nullptr,
@@ -43,7 +43,7 @@ HANDLE Serial::setUpSerial(int portNumber) {
     logger_.log(core::LogLevel::kFatal, "Error");
     exit(EXIT_FAILURE);
   }
-  logger_.log(core::LogLevel::kInfo, "Port opened successfully");
+  logger_.log(core::LogLevel::kDebug, "Port opened successfully");
   // Set device parameters (9600 baud, 1 start bit, 1 stop bit, no parity)
   dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
   if (GetCommState(hSerial, &dcbSerialParams) == 0) {

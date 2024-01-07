@@ -31,7 +31,7 @@ These can be installed on Linux with the following commands:
 
 ## Compilation
 
-This project is written for use on Windows, but is build using cross compilation on Linux.
+This project is written for use on Windows, but is built using cross compilation on Linux.
 
 To build the project, run the following commands from the project root:
 
@@ -41,11 +41,11 @@ To build the project, run the following commands from the project root:
     $ make
 
 
-The output executable can be found and ran (on Windows) here:
+The output executable can be found and ran (on Windows) here, substituting `{revision}` with the build's revision number:
 
-    $ ./bin/waterwheel_monitor
+    $ ./bin/waterwheel_monitor_{revision}
 
-To run the program in debug mode, add the flag `-d` when running
+To run the program in debug mode, add the flag `-d` when running.
 
 ## Code Style
 

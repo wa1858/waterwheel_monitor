@@ -4,6 +4,7 @@
 #include <hardware/serial.hpp>
 #include <utils/debug.hpp>
 #include <utils/utils.hpp>
+
 // #include "config.h"
 
 int main(int argc, char *argv[]) {
@@ -18,14 +19,15 @@ int main(int argc, char *argv[]) {
   logger.log(waterwheel::core::LogLevel::kInfo,
              "Waterwheel Monitoring Program");
   // TODO - Restructure CMakeLists.txt to allow inclusion of config.h in build
-  // logger.log(core::LogLevel::debug, "Revision %d.%d.%d",
-  // PROJECT_VERSION_MAJOR, PROJECT_VERSION_MINOR, PROJECT_VERSION_PATCH);
-  // logger.log(core::LogLevel::debug, "Build Date: %s", BUILD_DATE);
+  // logger.log(waterwheel::utils::LogLevel::kDebug, "Revision %d.%d.%d",
+  //  PROJECT_VERSION_MAJOR, PROJECT_VERSION_MINOR,
+  //  PROJECT_VERSION_PATCH);
+  // logger.log(waterwheel::utils::LogLevel::kDebug, "Build Date: %s",
+  // BUILD_DATE);
 
   // TODO - Imput validation
   int port_number;
-  logger.log(waterwheel::core::LogLevel::kInfo,
-             "Enter the desired serial port number: ");
+  std::cout << "Enter the desired serial port number: ";
   std::cin >> port_number;
   logger.log(waterwheel::core::LogLevel::kDebug, "Selected port: COM%d",
              port_number);
@@ -38,7 +40,6 @@ int main(int argc, char *argv[]) {
 
   auto monitor = waterwheel::core::Modbus(logger, port_number);
 
-  // TODO - Can this big loop with print statements be cleaned up?
   while (true) {
     // Break between each record
     std::cout << std::endl;
@@ -56,9 +57,8 @@ int main(int argc, char *argv[]) {
     float active_power = monitor.getActivePower();
     float average_active_power = monitor.getAverageActivePower(active_power);
     logger.log(waterwheel::core::LogLevel::kInfo,
-               "Active Power (W): %2.3f%sAverage Active Power (W): %2.3f",
-               active_power, waterwheel::core::kWhitespace,
-               average_active_power);
+               "Active Power (W): %2.3f Average Active Power (W): %2.3f",
+               active_power, average_active_power);
 
     float total_active_energy = monitor.getTotalActiveEnergy();
     logger.log(waterwheel::core::LogLevel::kInfo,
