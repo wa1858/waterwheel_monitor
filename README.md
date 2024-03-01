@@ -13,7 +13,7 @@ RS PRO DIN Rail Multifunction Power Meter
 MID Certified
 Stock No: 236-9298
 
-Underspeed threshold at 44.5Hz average and overspeed threshold at 48.5Hz average, with audio warning when either of these thresholds are crossed.
+Underspeed threshold at 44.5Hz average and overspeed threshold at 49.5Hz average, with audio warning when either of these thresholds are crossed.
 
 ## Dependencies
 - MinGW-W64

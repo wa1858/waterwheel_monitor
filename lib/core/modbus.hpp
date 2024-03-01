@@ -70,7 +70,7 @@ class Modbus {
  private:
   constexpr static int kSizeOfAverageArrays = 10;
   constexpr static float kFrequencyMin = 44.5;
-  constexpr static float kFrequencyMax = 48.5;
+  constexpr static float kFrequencyMax = 49.5;
   std::array<float, kSizeOfAverageArrays> averaging_frequency_data_ = {};
   std::array<float, kSizeOfAverageArrays> averaging_power_data_ = {};
   int average_count_ = 0;
