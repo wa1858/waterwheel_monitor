@@ -24,7 +24,7 @@ These can be installed on Linux with the following commands:
 ```
 $ sudo apt-get update -y
 $ sudo apt-get upgrade -y
-$ sudo apt-get install mingw-w64 cmake g++
+$ sudo apt-get install x86_64-w64-mingw32-g++-posix cmake g++
 ```
 
 ## Compilation

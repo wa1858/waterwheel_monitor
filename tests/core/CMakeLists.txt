@@ -9,7 +9,5 @@ target_link_libraries(
   GTest::gtest_main
   library_core
   library_utils
-  # Eigen3::Eigen
-  # Boost::boost
 )
 gtest_discover_tests(${target})
