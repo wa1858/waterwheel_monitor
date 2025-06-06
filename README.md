@@ -21,29 +21,28 @@ Underspeed threshold at 44.5Hz average and overspeed threshold at 48.5Hz average
 - CMake >= 3.22
 
 These can be installed on Linux with the following commands:
-
-    $ sudo apt-get update -y
-    $ sudo apt-get upgrade -y
-    $ sudo apt-get install mingw-w64
-    $ sudo apt-get install cmake
-    $ sudo apt-get install g++
-
+```
+$ sudo apt-get update -y
+$ sudo apt-get upgrade -y
+$ sudo apt-get install mingw-w64 cmake g++
+```
 
 ## Compilation
 
-This project is written for use on Windows, but is build using cross compilation on Linux.
+This project is written for use on Windows, but is built using cross compilation on Linux.
 
 To build the project, run the following commands from the project root:
 
-    $ mkdir build
-    $ cd build
-    $ cmake ..
-    $ make
-
+```
+$ cmake --preset windows-cross
+$ cmake --build --preset windows-release
+```
 
 The output executable can be found and ran (on Windows) here:
 
-    $ ./bin/waterwheel_monitor
+```
+$ ./bin/waterwheel_monitor
+```
 
 To run the program in debug mode, add the flag `-d` when running
 

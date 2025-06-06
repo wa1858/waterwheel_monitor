@@ -1,0 +1,29 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 21,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "windows-cross",
+      "displayName": "Windows (Cross-Compilation)",
+      "description": "Cross-compile for Windows using MinGW toolchain",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/bin",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "mingw-toolchain.cmake",
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "windows-release",
+      "configurePreset": "windows-cross",
+      "description": "Build Windows release",
+      "jobs": 8
+    }
+  ]
+}

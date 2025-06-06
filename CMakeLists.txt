@@ -6,9 +6,10 @@ project(waterwheel_monitor
     LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_C_COMPILER x86_64-w64-mingw32-gcc)
-set(CMAKE_CXX_COMPILER x86_64-w64-mingw32-g++)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wpedantic -static-libgcc -static-libstdc++")
+
+# enable_testing()
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/src)
 add_subdirectory(${PROJECT_SOURCE_DIR}/lib)
+# add_subdirectory(${PROJECT_SOURCE_DIR}/tests)
